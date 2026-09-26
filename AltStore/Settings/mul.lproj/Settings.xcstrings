@@ -428,7 +428,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "자동 잠금 비활성화"
+            "value": "유휴 시간 제한 비활성화"
           }
         }
       }
