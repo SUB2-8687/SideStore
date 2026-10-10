@@ -3941,7 +3941,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "Keychain에서 로컬 Anisette 프로비저닝 데이터 지우기"
+            "value": "키체인에서 로컬 Anisette 프로비저닝 데이터 지우기"
           }
         }
       }
@@ -17911,7 +17911,7 @@
         "ko": {
           "stringUnit": {
             "state": "translated",
-            "value": "SideStore에서 Apple 계정을 로그아웃하고 Keychain의 프로비저닝된 adi.pb 데이터를 지웁니다. 활성 서명 인증서는 유지됩니다."
+            "value": "SideStore에서 Apple 계정을 로그아웃하고 키체인의 프로비저닝된 adi.pb 데이터를 지웁니다. 활성 서명 인증서는 유지됩니다."
           }
         }
       }
