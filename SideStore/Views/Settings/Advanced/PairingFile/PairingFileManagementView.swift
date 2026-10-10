@@ -141,7 +141,7 @@ struct PairingFileManagementView: View {
                             .frame(width: 7, height: 7)
                             .shadow(color: (viewModel.preferredProtocol != nil ? ledColor(for: viewModel.preferredProtocol!) : Color.gray).opacity(0.8), radius: 3)
 
-                        Text(viewModel.preferredProtocol != nil ? activeProtocolTagText(for: viewModel.preferredProtocol!) : "None")
+                        Text(viewModel.preferredProtocol != nil ? activeProtocolTagText(for: viewModel.preferredProtocol!) : NSLocalizedString("None", comment: ""))
                             .font(.system(size: 13, weight: .semibold, design: .monospaced))
                             .foregroundColor(.white)
                     }
@@ -323,7 +323,7 @@ struct PairingFileManagementView: View {
                 .font(.system(size: 22))
                 .foregroundColor(proto == .rppairing ? .cyan : .green)
 
-            Text(proto == .rppairing ? "Remote Pairing File" : "Lockdown Pairing File")
+            Text(proto == .rppairing ? NSLocalizedString("Remote Pairing File", comment: "") : NSLocalizedString("Lockdown Pairing File", comment: ""))
                 .font(.system(size: 16, weight: .bold))
                 .foregroundColor(.white)
 
@@ -361,7 +361,7 @@ struct PairingFileManagementView: View {
                 .font(.system(size: 22))
                 .foregroundColor(Color.white.opacity(0.3))
 
-            Text(proto == .rppairing ? "Remote Pairing File" : "Lockdown Pairing File")
+            Text(proto == .rppairing ? NSLocalizedString("Remote Pairing File", comment: "") : NSLocalizedString("Lockdown Pairing File", comment: ""))
                 .font(.system(size: 16, weight: .bold))
                 .foregroundColor(Color.white.opacity(0.8))
 
@@ -391,7 +391,7 @@ struct PairingFileManagementView: View {
             viewModel.toggleReveal(for: fieldKey)
         } label: {
             HStack {
-                Text(label)
+                Text(NSLocalizedString(label, comment: ""))
                     .font(.system(size: 14))
                     .foregroundColor(Color.white.opacity(0.6))
                 Spacer()
@@ -407,11 +407,11 @@ struct PairingFileManagementView: View {
 
     private func infoRow(label: String, value: String, isMonospaced: Bool = false) -> some View {
         HStack {
-            Text(label)
+            Text(LocalizedStringKey(label))
                 .font(.system(size: 14))
                 .foregroundColor(Color.white.opacity(0.6))
             Spacer()
-            Text(value)
+            Text(NSLocalizedString(value, comment: ""))
                 .font(.system(size: 13, weight: .medium, design: isMonospaced ? .monospaced : .default))
                 .foregroundColor(Color.white.opacity(0.85))
                 .lineLimit(1)

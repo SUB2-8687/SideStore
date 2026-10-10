@@ -147,7 +147,7 @@ struct CertificatesView: View {
             SwiftUI.Button("Import") { viewModel.submitImportPassword() }
             SwiftUI.Button("Cancel", role: .cancel) { viewModel.cancelImport() }
         } message: {
-            Text("Enter the password to decrypt the imported certificate file.\n\nFile: \(viewModel.currentImportFilename)")
+            Text(String(format: NSLocalizedString("Enter the password to decrypt the imported certificate file.\n\nFile: %@", comment: ""), viewModel.currentImportFilename))
         }
         .alert("Success", isPresented: $viewModel.showAlert) {
             SwiftUI.Button("OK", role: .cancel) { viewModel.alertMessage = nil }
@@ -211,7 +211,7 @@ struct CertificatesView: View {
             SwiftUI.Button("Cancel", role: .cancel) { certificateToClearKeyFor = nil }
         } message: {
             if let cert = certificateToClearKeyFor {
-                Text("This will clear the locally stored private key of this certificate.\n\nName: \(cert.name)\nS/N: \(cert.serialNumber)")
+                Text(String(format: NSLocalizedString("This will clear the locally stored private key of this certificate.\n\nName: %@\nS/N: %@", comment: ""), cert.name, cert.serialNumber))
             }
         }
         #if !os(tvOS)
@@ -399,8 +399,8 @@ private struct CreateCertificateSheetView: View {
                 Section(
                     header: Text("Certificate Information"),
                     footer: Text(isPaidWarningVisible
-                        ? "This certificate type requires a paid Apple Developer account."
-                        : "Select the certificate type and machine name. This registers the certificate on Apple's servers and saves the private key locally.")
+                        ? NSLocalizedString("This certificate type requires a paid Apple Developer account.", comment: "")
+                        : NSLocalizedString("Select the certificate type and machine name. This registers the certificate on Apple's servers and saves the private key locally.", comment: ""))
                 ) {
                     Picker("Certificate Type", selection: $selectedCertificateType) {
                         ForEach(viewModel.availableCertificateTypes, id: \.rawValue) { certType in

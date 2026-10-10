@@ -45,7 +45,7 @@ struct BundleResourceBrowserView: View {
     var body: some View {
         List {
             if filteredItems.isEmpty {
-                Text(items.isEmpty ? "Empty directory" : "No results")
+                Text(items.isEmpty ? NSLocalizedString("Empty directory", comment: "") : NSLocalizedString("No results", comment: ""))
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             } else {
@@ -78,7 +78,7 @@ struct BundleResourceBrowserView: View {
         .toolbar {
             // Trailing: Select / Done
             ToolbarItem(placement: .navigationBarTrailing) {
-                SwiftUI.Button(isSelecting ? "Done" : "Select") {
+                SwiftUI.Button(isSelecting ? NSLocalizedString("Done", comment: "") : NSLocalizedString("Select", comment: "")) {
                     withAnimation {
                         isSelecting.toggle()
                         if !isSelecting { selectedURLs.removeAll() }
@@ -579,7 +579,7 @@ struct PlistResourceViewer: View {
                 InfoPlistContainerView(plist: dict, title: url.lastPathComponent)
             } else {
                 ScrollView {
-                    Text(rawText.isEmpty ? "Loading..." : rawText)
+                    Text(rawText.isEmpty ? NSLocalizedString("Loading...", comment: "") : rawText)
                         .font(.system(size: 12, design: .monospaced))
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding()
@@ -651,7 +651,7 @@ struct ResourceTextViewer: View {
 
     var body: some View {
         ScrollView {
-            Text(content.isEmpty ? "Loading..." : content)
+            Text(content.isEmpty ? NSLocalizedString("Loading...", comment: "") : content)
                 .font(.system(size: 12, design: .monospaced))
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding()

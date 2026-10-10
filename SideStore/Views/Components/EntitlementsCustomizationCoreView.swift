@@ -207,7 +207,7 @@ public struct EntitlementsCustomizationCoreView: View {
         HStack(spacing: 6) {
             Image(systemName: viewModel.teamType == .free ? "person.crop.circle" : "star.circle.fill")
                 .font(.system(size: 11, weight: .semibold))
-            Text(viewModel.teamType == .free ? "Free Account" : "Paid Developer")
+            Text(viewModel.teamType == .free ? NSLocalizedString("Free Account", comment: "") : NSLocalizedString("Paid Developer", comment: ""))
                 .font(.system(size: 11, weight: .semibold))
         }
         .foregroundColor(viewModel.teamType == .free ? Color.orange : Color.green)
@@ -274,7 +274,7 @@ public struct EntitlementsCustomizationCoreView: View {
                                 .font(.system(size: 14, weight: .semibold))
                                 .foregroundColor(.primary)
 
-                            Text(viewModel.currentTarget?.isExtension == true ? "Extension" : "Main App")
+                            Text(viewModel.currentTarget?.isExtension == true ? NSLocalizedString("Extension", comment: "") : NSLocalizedString("Main App", comment: ""))
                                 .font(.system(size: 10, weight: .semibold))
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)

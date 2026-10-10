@@ -29,11 +29,11 @@ struct SignableCertificateRowView: View {
     
     private var statusText: String? {
         if isAppCert && isActiveGlobal {
-            return "Current App & Active Global"
+            return NSLocalizedString("Current App & Active Global", comment: "")
         } else if isAppCert {
-            return "Current App"
+            return NSLocalizedString("Current App", comment: "")
         } else if isActiveGlobal {
-            return "Active Global"
+            return NSLocalizedString("Active Global", comment: "")
         }
         return nil
     }
@@ -77,7 +77,7 @@ struct SignableCertificateRowView: View {
                     
                     (
                         Text("Validity: ").font(.system(size: 10))
-                        + Text("\(brief.validFrom) - \(brief.validUntil)").font(.system(size: 10))
+                        + Text(String(format: NSLocalizedString("%@ - %@", comment: ""), brief.validFrom, brief.validUntil)).font(.system(size: 10))
                     )
                     .foregroundColor(Color(uiColor: .lightGray))
                 }

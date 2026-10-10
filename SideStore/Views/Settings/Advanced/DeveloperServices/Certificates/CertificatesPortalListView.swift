@@ -41,7 +41,7 @@ struct CertificatesPortalListView: View {
                         }
                         .padding(.vertical, 8)
                     } else {
-                        Text(searchText.isEmpty ? "No certificates found on Developer Portal." : "No matching certificates found.")
+                        Text(searchText.isEmpty ? NSLocalizedString("No certificates found on Developer Portal.", comment: "") : NSLocalizedString("No matching certificates found.", comment: ""))
                             .foregroundColor(.secondary)
                             .font(.subheadline)
                     }

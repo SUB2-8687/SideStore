@@ -33,7 +33,7 @@ struct ProfilesListView: View {
 
     var body: some View {
         List {
-            Section(header: Text("Provisioning Profiles (\(viewModel.profiles.count))"), footer: Text("Deleting profiles on the developer portal allows Apple to issue fresh profiles with updated certificates and unflagged UUIDs.")) {
+            Section(header: Text(String(format: NSLocalizedString("Provisioning Profiles (%d)", comment: ""), viewModel.profiles.count)), footer: Text("Deleting profiles on the developer portal allows Apple to issue fresh profiles with updated certificates and unflagged UUIDs.")) {
                 if filteredProfiles.isEmpty {
                     if viewModel.isLoading {
                         HStack {
@@ -43,7 +43,7 @@ struct ProfilesListView: View {
                         }
                         .padding(.vertical, 8)
                     } else {
-                        Text(searchText.isEmpty ? "No Provisioning Profiles found on Developer Portal." : "No matching Provisioning Profiles found.")
+                        Text(searchText.isEmpty ? NSLocalizedString("No Provisioning Profiles found on Developer Portal.", comment: "") : NSLocalizedString("No matching Provisioning Profiles found.", comment: ""))
                             .foregroundColor(.secondary)
                             .font(.subheadline)
                     }
@@ -115,7 +115,7 @@ struct ProfilesListView: View {
         .alert(isPresented: $showDeleteConfirmation) {
             Alert(
                 title: Text("Delete Provisioning Profile?"),
-                message: Text("Are you sure you want to delete '\(profileToDelete?.name ?? "this profile")' from the Apple Developer Portal?"),
+                message: Text(String(format: NSLocalizedString("Are you sure you want to delete '%@' from the Apple Developer Portal?", comment: ""), profileToDelete?.name ?? "this profile")),
                 primaryButton: .destructive(Text("Delete")) {
                     if let target = profileToDelete {
                         Task {
@@ -127,14 +127,14 @@ struct ProfilesListView: View {
             )
         }
         .alert("Purge All Profiles?", isPresented: $showPurgeAllConfirmation) {
-            SwiftUI.Button("Delete All (\(viewModel.profiles.count))", role: .destructive) {
+            SwiftUI.Button(String(format: NSLocalizedString("Delete All (%d)", comment: ""), viewModel.profiles.count), role: .destructive) {
                 Task {
                     _ = await viewModel.deleteAllProfiles(presentingViewController: presentingViewController)
                 }
             }
             SwiftUI.Button("Cancel", role: .cancel) {}
         } message: {
-            Text("This will permanently delete all \(viewModel.profiles.count) provisioning profile(s) for team '\(viewModel.team?.name ?? "")' on Apple's developer portal. SideStore will automatically generate fresh profiles on next app install or refresh.")
+            Text(String(format: NSLocalizedString("This will permanently delete all %d provisioning profile(s) for team '%@' on Apple's developer portal. SideStore will automatically generate fresh profiles on next app install or refresh.", comment: ""), viewModel.profiles.count, viewModel.team?.name ?? ""))
         }
         .developerServicesToast(viewModel: viewModel)
     }
@@ -171,7 +171,7 @@ private struct ProfileRow: View {
                         .foregroundColor(.red)
                         .cornerRadius(6)
                 }
-                Text("Expires: \(formatDate(profile.dateExpire))")
+                Text(String(format: NSLocalizedString("Expires: %@", comment: ""), formatDate(profile.dateExpire)))
                     .font(.caption)
                     .foregroundColor(isExpired ? .red : .secondary)
             }
@@ -194,7 +194,7 @@ private struct ProfileRow: View {
                         .cornerRadius(6)
                 }
                 if let isTeam = profile.isTeamProfile {
-                    Text(isTeam ? "Xcode Managed" : "Manual")
+                    Text(isTeam ? NSLocalizedString("Xcode Managed", comment: "") : NSLocalizedString("Manual", comment: ""))
                         .font(.caption2)
                         .fontWeight(.medium)
                         .padding(.horizontal, 6)

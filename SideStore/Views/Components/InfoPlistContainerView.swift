@@ -20,16 +20,16 @@ struct PlistNode: Identifiable {
     static func parse(key: String, value: Any) -> PlistNode {
         if let dict = value as? [String: any Sendable] {
             let sortedChildren = dict.keys.sorted().map { parse(key: $0, value: dict[$0]!) }
-            return PlistNode(key: key, value: nil, typeInfo: "Dictionary (\(dict.count) keys)", children: sortedChildren)
+            return PlistNode(key: key, value: nil, typeInfo: String(format: NSLocalizedString("Dictionary (%lld keys)", comment: ""), dict.count), children: sortedChildren)
         } else if let dict = value as? [String: Any] {
             let sortedChildren = dict.keys.sorted().map { parse(key: $0, value: dict[$0]!) }
-            return PlistNode(key: key, value: nil, typeInfo: "Dictionary (\(dict.count) keys)", children: sortedChildren)
+            return PlistNode(key: key, value: nil, typeInfo: String(format: NSLocalizedString("Dictionary (%lld keys)", comment: ""), dict.count), children: sortedChildren)
         } else if let array = value as? [any Sendable] {
             let children = array.enumerated().map { parse(key: "Index \($0)", value: $1) }
-            return PlistNode(key: key, value: nil, typeInfo: "Array (\(array.count) items)", children: children)
+            return PlistNode(key: key, value: nil, typeInfo: String(format: NSLocalizedString("Array (%lld items)", comment: ""), array.count), children: children)
         } else if let array = value as? [Any] {
             let children = array.enumerated().map { parse(key: "Index \($0)", value: $1) }
-            return PlistNode(key: key, value: nil, typeInfo: "Array (\(array.count) items)", children: children)
+            return PlistNode(key: key, value: nil, typeInfo: String(format: NSLocalizedString("Array (%lld items)", comment: ""), array.count), children: children)
         } else if let data = value as? Data {
             let hex = data.map { String(format: "%02x", $0) }.joined()
             return PlistNode(key: key, value: hex, typeInfo: "Data (\(data.count) bytes)", children: nil)
@@ -107,7 +107,7 @@ struct InfoPlistContainerView: View {
         VStack(spacing: 0) {
             Picker("Visualization Mode", selection: $selectedMode) {
                 ForEach(InfoPlistMode.allCases) { mode in
-                    Text(mode.rawValue).tag(mode)
+                    Text(NSLocalizedString(mode.rawValue, comment: "")).tag(mode)
                 }
             }
             .pickerStyle(.segmented)
@@ -240,7 +240,7 @@ struct PlistNodeRow: View {
         }
         #else
         if let children = node.children {
-            Section(header: Text("\(node.key) (\(node.typeInfo))")) {
+            Section(header: Text(String(format: NSLocalizedString("%@ (%@)", comment: ""), node.key, node.typeInfo))) {
                 ForEach(children) { child in
                     PlistNodeRow(node: child)
                 }
@@ -326,7 +326,7 @@ struct InfoPlistRawXMLView: View {
                             isWrapped.toggle()
                         }
                     } label: {
-                        Label(isWrapped ? "Wrap: On" : "Wrap: Off", systemImage: isWrapped ? "text.alignleft" : "text.chevron.right")
+                        Label(isWrapped ? NSLocalizedString("Wrap: On", comment: "") : NSLocalizedString("Wrap: Off", comment: ""), systemImage: isWrapped ? "text.alignleft" : "text.chevron.right")
                             .font(.footnote)
                     }
                     .buttonStyle(.bordered)
@@ -343,7 +343,7 @@ struct InfoPlistRawXMLView: View {
                             }
                         }
                     } label: {
-                        Label(isCopied ? "Copied!" : "Copy XML", systemImage: isCopied ? "checkmark" : "doc.on.doc")
+                        Label(isCopied ? NSLocalizedString("Copied!", comment: "") : NSLocalizedString("Copy XML", comment: ""), systemImage: isCopied ? "checkmark" : "doc.on.doc")
                             .font(.footnote)
                     }
                     .buttonStyle(.borderedProminent)
@@ -417,7 +417,7 @@ struct InfoPlistRawView: View {
                             isWrapped.toggle()
                         }
                     } label: {
-                        Label(isWrapped ? "Wrap: On" : "Wrap: Off", systemImage: isWrapped ? "text.alignleft" : "text.chevron.right")
+                        Label(isWrapped ? NSLocalizedString("Wrap: On", comment: "") : NSLocalizedString("Wrap: Off", comment: ""), systemImage: isWrapped ? "text.alignleft" : "text.chevron.right")
                             .font(.footnote)
                     }
                     .buttonStyle(.bordered)
@@ -434,7 +434,7 @@ struct InfoPlistRawView: View {
                             }
                         }
                     } label: {
-                        Label(isCopied ? "Copied!" : "Copy JSON", systemImage: isCopied ? "checkmark" : "doc.on.doc")
+                        Label(isCopied ? NSLocalizedString("Copied!", comment: "") : NSLocalizedString("Copy JSON", comment: ""), systemImage: isCopied ? "checkmark" : "doc.on.doc")
                             .font(.footnote)
                     }
                     .buttonStyle(.borderedProminent)
@@ -599,7 +599,7 @@ struct InfoPlistSemanticView: View {
             
             // Privacy Permissions Card
             if !privacyPermissions.isEmpty {
-                Section(header: Text("Privacy Permissions (\(privacyPermissions.count))")) {
+                Section(header: Text(String(format: NSLocalizedString("Privacy Permissions (%d)", comment: ""), privacyPermissions.count))) {
                     ForEach(privacyPermissions.keys.sorted(), id: \.self) { key in
                         LocalCopyableDescriptionRow(key: key, value: privacyPermissions[key] ?? "")
                     }
@@ -683,7 +683,7 @@ struct InfoPlistSemanticView: View {
 
 // MARK: - Localized Semantic Value Row
 struct SemanticValueRow: View {
-    let label: String
+    let label: LocalizedStringKey
     let value: String
     
     var body: some View {
@@ -692,7 +692,7 @@ struct SemanticValueRow: View {
                 .font(.subheadline)
                 .foregroundColor(.secondary)
             Spacer()
-            Text(value)
+            Text(NSLocalizedString(value, comment: ""))
                 .font(.subheadline)
                 .foregroundColor(.primary)
                 .multilineTextAlignment(.trailing)
