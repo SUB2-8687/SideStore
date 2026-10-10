@@ -35,7 +35,6 @@ private keys, anisette data, Apple IDs, passwords, or device UDIDs.
   (`AppBootManager.swift`), maintenance (`MaintenanceManager.swift`), deep links,
   and core utilities.
 - `SideBackup/` - Helper launcher and backup engine target.
-- `AltWidget/` - Home Screen and Lock Screen widget extension.
 - `Shared/` - Shared utilities, categories, extensions, and error definitions.
 - `Dependencies/` - Vendored submodules (`minimuxer`, `SideSign`) integrated as
   local Swift Packages. Avoid touching these unless explicitly updating dependencies.

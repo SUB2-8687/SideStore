@@ -100,6 +100,7 @@ final class AboutPatreonHeaderView: UICollectionReusableView
     {
         super.awakeFromNib()
         
+        self.textView.text = NSLocalizedString("Thank you for using SideStore!\n\nSubscribing to the patreon supports us and makes sure we can continue developing SideStore for you.\n\nFollowing us on social media allows us to give quick updates and spread the word about sideloading!\n\n-SideTeam", comment: "")
         self.textView.clipsToBounds = true
         self.textView.layer.cornerRadius = 20
         self.textView.textContainer.lineFragmentPadding = 0
