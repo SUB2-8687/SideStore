@@ -34,7 +34,7 @@ struct AppIDsListView: View {
 
     var body: some View {
         List {
-            Section(header: Text("Registered App IDs (\(viewModel.appIDs.count))")) {
+            Section(header: Text(String(format: NSLocalizedString("Registered App IDs (%d)", comment: ""), viewModel.appIDs.count))) {
                 if filteredAppIDs.isEmpty {
                     if viewModel.isLoading {
                         HStack {
@@ -44,7 +44,7 @@ struct AppIDsListView: View {
                         }
                         .padding(.vertical, 8)
                     } else {
-                        Text(searchText.isEmpty ? "No App IDs registered on Developer Portal." : "No matching App IDs found.")
+                        Text(searchText.isEmpty ? NSLocalizedString("No App IDs registered on Developer Portal.", comment: "") : NSLocalizedString("No matching App IDs found.", comment: ""))
                             .foregroundColor(.secondary)
                             .font(.subheadline)
                     }
@@ -53,11 +53,11 @@ struct AppIDsListView: View {
                         NavigationLink(destination: AppIDDetailView(appID: appID, viewModel: viewModel, presentingViewController: presentingViewController)) {
                             VStack(alignment: .leading, spacing: 4) {
                                 HStack {
-                                    Text(appID.name.isEmpty ? "App ID" : appID.name)
+                                    Text(appID.name.isEmpty ? NSLocalizedString("App ID", comment: "") : appID.name)
                                         .font(.headline)
                                     Spacer()
                                     if !appID.features.isEmpty {
-                                        Text("\(appID.features.count) features")
+                                        Text(String(format: NSLocalizedString("%d features", comment: ""), appID.features.count))
                                             .font(.caption2)
                                             .padding(.horizontal, 6)
                                             .padding(.vertical, 2)
@@ -70,12 +70,12 @@ struct AppIDsListView: View {
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
                                 HStack {
-                                    Text("ID: \(appID.identifier)")
+                                    Text(String(format: NSLocalizedString("ID: %@", comment: ""), appID.identifier))
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                     Spacer()
                                     if let expiration = appID.expirationDate {
-                                        Text("Expires: \(formatDate(expiration))")
+                                        Text(String(format: NSLocalizedString("Expires: %@", comment: ""), formatDate(expiration)))
                                             .font(.caption)
                                             .foregroundColor(expiration < Date() ? .red : .secondary)
                                     }
@@ -162,7 +162,7 @@ struct AppIDsListView: View {
         }
         .alert(isPresented: $showDeleteConfirmation) {
             Alert(
-                title: Text(viewModel.isPaidAccount ? "Delete App ID?" : "Warning: Delete App ID?"),
+                title: Text(viewModel.isPaidAccount ? NSLocalizedString("Delete App ID?", comment: "") : NSLocalizedString("Warning: Delete App ID?", comment: "")),
                 message: Text(deleteAlertMessage),
                 primaryButton: .destructive(Text("Delete")) {
                     if let target = appIDToDelete {
@@ -179,23 +179,22 @@ struct AppIDsListView: View {
 
     private var deleteAlertMessage: String {
         guard let appID = appIDToDelete else { return "" }
-        let name = appID.name.isEmpty ? "this App ID" : "'\(appID.name)'"
+        let name = appID.name.isEmpty ? NSLocalizedString("this App ID", comment: "") : "'\(appID.name)'"
         let bundleID = appID.bundleIdentifier.isEmpty ? "" : " (\(appID.bundleIdentifier))"
 
         if viewModel.isPaidAccount {
-            return "Are you sure you want to delete \(name)\(bundleID)? This will also remove any associated provisioning profiles."
+            return String(format: NSLocalizedString("Are you sure you want to delete %@%@? This will also remove any associated provisioning profiles.", comment: ""), name, bundleID)
         }
 
-        var expiryNotice = "until it expires automatically after the remaining days of its usual 7-day validity."
         if let expiration = appID.expirationDate {
             let calendar = Calendar.current
             let components = calendar.dateComponents([.day], from: Date(), to: expiration)
             if let days = components.day, days > 0 {
-                expiryNotice = "until it expires automatically in \(days) day\(days == 1 ? "" : "s") (from its usual 7-day validity)."
+                return String(format: NSLocalizedString("Warning: Deleting %1$@%2$@ does not free up an App ID slot.\n\nThis App ID will become reserved and will not be available for use until it expires automatically in %3$d day(s) (from its usual 7-day validity).\n\nAre you sure you want to delete it?", comment: ""), name, bundleID, days)
             }
         }
 
-        return "Warning: Deleting \(name)\(bundleID) does not free up an App ID slot.\n\nThis App ID will become reserved and will not be available for use \(expiryNotice)\n\nAre you sure you want to delete it?"
+        return String(format: NSLocalizedString("Warning: Deleting %@%@ does not free up an App ID slot.\n\nThis App ID will become reserved and will not be available for use until it expires automatically after the remaining days of its usual 7-day validity.\n\nAre you sure you want to delete it?", comment: ""), name, bundleID)
     }
 
     private func formatDate(_ date: Date) -> String {

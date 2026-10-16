@@ -149,7 +149,7 @@ struct AppInfoView: View {
                 // Provisioning Profile Section
                 if resignedProfileURL != nil || bundleProfileURL != nil {
                     Section(header: HStack {
-                        Text(showResignedProfile ? "Provisioning Profile (Resigned)" : "Provisioning Profile (Bundle)")
+                        Text(showResignedProfile ? NSLocalizedString("Provisioning Profile (Resigned)", comment: "") : NSLocalizedString("Provisioning Profile (Bundle)", comment: ""))
                         Spacer()
                         SwiftUI.Button {
                             showResignedProfile.toggle()
@@ -175,7 +175,7 @@ struct AppInfoView: View {
                                 SwiftUI.Button {
                                     showResignedProfile.toggle()
                                 } label: {
-                                    Label(showResignedProfile ? "Switch to Bundle Profile" : "Switch to Resigned Profile",
+                                    Label(showResignedProfile ? NSLocalizedString("Switch to Bundle Profile", comment: "") : NSLocalizedString("Switch to Resigned Profile", comment: ""),
                                           systemImage: showResignedProfile ? "circle" : "checkmark.circle.fill")
                                 }
                                 if let url = activeProfileURL {
@@ -190,10 +190,10 @@ struct AppInfoView: View {
                         } else {
                             HStack {
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text(showResignedProfile ? "No Resigned Profile Cached" : "No Bundle Profile Found")
+                                    Text(showResignedProfile ? NSLocalizedString("No Resigned Profile Cached", comment: "") : NSLocalizedString("No Bundle Profile Found", comment: ""))
                                         .font(.subheadline)
                                         .foregroundColor(.secondary)
-                                    Text("Tap toggle to view \(showResignedProfile ? "bundle" : "resigned") profile")
+                                    Text(showResignedProfile ? NSLocalizedString("Tap toggle to view bundle profile", comment: "") : NSLocalizedString("Tap toggle to view resigned profile", comment: ""))
                                         .font(.caption2)
                                         .foregroundColor(.secondary)
                                 }
@@ -210,7 +210,7 @@ struct AppInfoView: View {
                 // Info.plist Section
                 if resignedInfoPlistURL != nil || bundleInfoPlistURL != nil {
                     Section(header: HStack {
-                        Text(showResignedInfoPlist ? "Info.plist (Resigned)" : "Info.plist (Bundle)")
+                        Text(showResignedInfoPlist ? NSLocalizedString("Info.plist (Resigned)", comment: "") : NSLocalizedString("Info.plist (Bundle)", comment: ""))
                         Spacer()
                         SwiftUI.Button {
                             showResignedInfoPlist.toggle()
@@ -231,7 +231,7 @@ struct AppInfoView: View {
                                 SwiftUI.Button {
                                     showResignedInfoPlist.toggle()
                                 } label: {
-                                    Label(showResignedInfoPlist ? "Switch to Bundle Info.plist" : "Switch to Resigned Info.plist",
+                                    Label(showResignedInfoPlist ? NSLocalizedString("Switch to Bundle Info.plist", comment: "") : NSLocalizedString("Switch to Resigned Info.plist", comment: ""),
                                           systemImage: showResignedInfoPlist ? "circle" : "checkmark.circle.fill")
                                 }
                                 if let url = activeInfoPlistURL {
@@ -246,10 +246,10 @@ struct AppInfoView: View {
                         } else {
                             HStack {
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text(showResignedInfoPlist ? "No Resigned Info.plist Cached" : "No Bundle Info.plist Found")
+                                    Text(showResignedInfoPlist ? NSLocalizedString("No Resigned Info.plist Cached", comment: "") : NSLocalizedString("No Bundle Info.plist Found", comment: ""))
                                         .font(.subheadline)
                                         .foregroundColor(.secondary)
-                                    Text("Tap toggle to view \(showResignedInfoPlist ? "bundle" : "resigned") Info.plist")
+                                    Text(showResignedInfoPlist ? NSLocalizedString("Tap toggle to view bundle Info.plist", comment: "") : NSLocalizedString("Tap toggle to view resigned Info.plist", comment: ""))
                                         .font(.caption2)
                                         .foregroundColor(.secondary)
                                 }
@@ -462,11 +462,11 @@ struct InfoRow: View {
     
     var body: some View {
         HStack {
-            Text(label)
+            Text(NSLocalizedString(label, comment: ""))
                 .font(.subheadline)
                 .foregroundColor(.secondary)
             Spacer()
-            Text(value)
+            Text(NSLocalizedString(value, comment: ""))
                 .font(.subheadline)
                 .foregroundColor(valueColor)
                 .multilineTextAlignment(.trailing)
@@ -481,11 +481,11 @@ struct ProfileInfoRow: View {
     
     var body: some View {
         HStack {
-            Text(label)
+            Text(NSLocalizedString(label, comment: ""))
                 .font(.subheadline)
                 .foregroundColor(.secondary)
             Spacer()
-            Text(value)
+            Text(NSLocalizedString(value, comment: ""))
                 .font(.subheadline)
                 .foregroundColor(valueColor)
                 .multilineTextAlignment(.trailing)
@@ -712,7 +712,7 @@ struct ExtensionInfoView: View {
             // Provisioning Profile
             if resignedProfileURL != nil || bundleProfileURL != nil {
                 Section(header: HStack {
-                    Text(showResignedProfile ? "Provisioning Profile (Resigned)" : "Provisioning Profile (Bundle)")
+                    Text(showResignedProfile ? NSLocalizedString("Provisioning Profile (Resigned)", comment: "") : NSLocalizedString("Provisioning Profile (Bundle)", comment: ""))
                     Spacer()
                     SwiftUI.Button {
                         showResignedProfile.toggle()
@@ -741,7 +741,7 @@ struct ExtensionInfoView: View {
                             SwiftUI.Button {
                                 showResignedProfile.toggle()
                             } label: {
-                                Label(showResignedProfile ? "Switch to Bundle Profile" : "Switch to Resigned Profile",
+                                Label(showResignedProfile ? NSLocalizedString("Switch to Bundle Profile", comment: "") : NSLocalizedString("Switch to Resigned Profile", comment: ""),
                                       systemImage: showResignedProfile ? "circle" : "checkmark.circle.fill")
                             }
                             if let url = activeProfileURL {
@@ -756,10 +756,10 @@ struct ExtensionInfoView: View {
                     } else {
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(showResignedProfile ? "No Resigned Profile Cached" : "No Bundle Profile Found")
+                                Text(showResignedProfile ? NSLocalizedString("No Resigned Profile Cached", comment: "") : NSLocalizedString("No Bundle Profile Found", comment: ""))
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
-                                Text("Tap toggle to view \(showResignedProfile ? "bundle" : "resigned") profile")
+                                Text(showResignedProfile ? NSLocalizedString("Tap toggle to view bundle profile", comment: "") : NSLocalizedString("Tap toggle to view resigned profile", comment: ""))
                                     .font(.caption2)
                                     .foregroundColor(.secondary)
                             }
@@ -776,7 +776,7 @@ struct ExtensionInfoView: View {
             // Info.plist
             if resignedInfoPlistURL != nil || bundleInfoPlistURL != nil {
                 Section(header: HStack {
-                    Text(showResignedInfoPlist ? "Info.plist (Resigned)" : "Info.plist (Bundle)")
+                    Text(showResignedInfoPlist ? NSLocalizedString("Info.plist (Resigned)", comment: "") : NSLocalizedString("Info.plist (Bundle)", comment: ""))
                     Spacer()
                     SwiftUI.Button {
                         showResignedInfoPlist.toggle()
@@ -797,7 +797,7 @@ struct ExtensionInfoView: View {
                             SwiftUI.Button {
                                 showResignedInfoPlist.toggle()
                             } label: {
-                                Label(showResignedInfoPlist ? "Switch to Bundle Info.plist" : "Switch to Resigned Info.plist",
+                                Label(showResignedInfoPlist ? NSLocalizedString("Switch to Bundle Info.plist", comment: "") : NSLocalizedString("Switch to Resigned Info.plist", comment: ""),
                                       systemImage: showResignedInfoPlist ? "circle" : "checkmark.circle.fill")
                             }
                             if let url = activeInfoPlistURL {
@@ -812,10 +812,10 @@ struct ExtensionInfoView: View {
                     } else {
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(showResignedInfoPlist ? "No Resigned Info.plist Cached" : "No Bundle Info.plist Found")
+                                Text(showResignedInfoPlist ? NSLocalizedString("No Resigned Info.plist Cached", comment: "") : NSLocalizedString("No Bundle Info.plist Found", comment: ""))
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
-                                Text("Tap toggle to view \(showResignedInfoPlist ? "bundle" : "resigned") Info.plist")
+                                Text(showResignedInfoPlist ? NSLocalizedString("Tap toggle to view bundle Info.plist", comment: "") : NSLocalizedString("Tap toggle to view resigned Info.plist", comment: ""))
                                     .font(.caption2)
                                     .foregroundColor(.secondary)
                             }

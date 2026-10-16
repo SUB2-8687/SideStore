@@ -55,24 +55,27 @@ final class SetProfileAlertViewController: UIViewController {
         let targetCertSerial = targetCertificate?.serialNumber ?? "N/A"
         let targetTeam = "\(targetProfile.teamName) (\(targetProfile.teamIdentifier))"
 
-        let details = """
-          • App: \(installedApp.name)
-          • Bundle ID: \(installedApp.resignedBundleIdentifier)
-
-        [CURRENT PROVISIONING PROFILE]
-          • Name: \(currentProfileName)
-          • Bundle ID: \(currentProfileBundleID)
-          • Expires: \(currentProfileExpiry)
-          • Signer: \(currentCertName)
-
-        [TARGET PROVISIONING PROFILE]
-          • Name: \(targetProfileName)
-          • Bundle ID: \(targetProfileBundleID)
-          • Expires: \(targetProfileExpiry)
-          • Team: \(targetTeam)
-          • Signer: \(targetCertName)
-          • Serial: \(targetCertSerial)
-        """
+        func row(_ label: String, _ value: String) -> String {
+            return "  • " + NSLocalizedString(label, comment: "") + ": " + value
+        }
+        let details = [
+            row("App", installedApp.name),
+            row("Bundle ID", installedApp.resignedBundleIdentifier),
+            "",
+            NSLocalizedString("[CURRENT PROVISIONING PROFILE]", comment: ""),
+            row("Name", currentProfileName),
+            row("Bundle ID", currentProfileBundleID),
+            row("Expires", currentProfileExpiry),
+            row("Signer", currentCertName),
+            "",
+            NSLocalizedString("[TARGET PROVISIONING PROFILE]", comment: ""),
+            row("Name", targetProfileName),
+            row("Bundle ID", targetProfileBundleID),
+            row("Expires", targetProfileExpiry),
+            row("Team", targetTeam),
+            row("Signer", targetCertName),
+            row("Serial", targetCertSerial)
+        ].joined(separator: "\n")
 
         let detailsLabel = UILabel()
         detailsLabel.text = details

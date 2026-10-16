@@ -68,9 +68,9 @@ public enum AppConstants {
         public static let defaultODAMetadataURL       = URL(string: "https://zzz.haus/oda.json")!
         public static var defaultODAMetadataURLString: String { defaultODAMetadataURL.absoluteString }
 
-        // Proxied from upstream SideSign
-        public static let defaultClientInfo           = Constants.Anisette.defaultClientInfo
-        public static let defaultUserAgent            = Constants.Anisette.defaultUserAgent
+        // Defaults match the values shown on the Client Config screen
+        public static let defaultClientInfo           = "<MacBookPro18,3> <macOS;26.6;25F84> <com.apple.AuthKit/1 (com.apple.akd/1.0)>"
+        public static let defaultUserAgent            = "AuthKit/1 (Macintosh; OS X 26.6) (com.apple.akd/1.0)"
 
         public enum URLs {
             public static let grandSlamLookup = Constants.Anisette.URLs.grandSlamLookup

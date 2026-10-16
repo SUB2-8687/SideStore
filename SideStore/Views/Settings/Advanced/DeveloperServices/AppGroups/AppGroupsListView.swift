@@ -38,7 +38,7 @@ struct AppGroupsListView: View {
 
     var body: some View {
         List {
-            Section(header: Text("App Groups (\(viewModel.appGroups.count))"), footer: Text("App Groups enable data sharing across multiple apps and extensions within the same developer team. Tap a group to edit its name or delete it.")) {
+            Section(header: Text(String(format: NSLocalizedString("App Groups (%d)", comment: ""), viewModel.appGroups.count)), footer: Text("App Groups enable data sharing across multiple apps and extensions within the same developer team. Tap a group to edit its name or delete it.")) {
                 if filteredGroups.isEmpty {
                     if viewModel.isLoading {
                         HStack {
@@ -48,7 +48,7 @@ struct AppGroupsListView: View {
                         }
                         .padding(.vertical, 8)
                     } else {
-                        Text(searchText.isEmpty ? "No App Groups found on Developer Portal." : "No matching App Groups found.")
+                        Text(searchText.isEmpty ? NSLocalizedString("No App Groups found on Developer Portal.", comment: "") : NSLocalizedString("No matching App Groups found.", comment: ""))
                             .foregroundColor(.secondary)
                             .font(.subheadline)
                     }
@@ -60,7 +60,7 @@ struct AppGroupsListView: View {
                         } label: {
                             VStack(alignment: .leading, spacing: 4) {
                                 HStack {
-                                    Text(group.name.isEmpty ? "App Group" : group.name)
+                                    Text(group.name.isEmpty ? NSLocalizedString("App Group", comment: "") : group.name)
                                         .font(.headline)
                                         .foregroundColor(.primary)
                                     Spacer()
@@ -72,7 +72,7 @@ struct AppGroupsListView: View {
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
                                 HStack {
-                                    Text("Group ID: \(group.identifier)")
+                                    Text(String(format: NSLocalizedString("Group ID: %@", comment: ""), group.identifier))
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                     Spacer()
@@ -225,7 +225,7 @@ struct AppGroupsListView: View {
                 .alert(isPresented: $showSheetDeleteConfirmation) {
                     Alert(
                         title: Text("Delete App Group?"),
-                        message: Text("Are you sure you want to delete '\(group.name)' (\(group.groupIdentifier)) from Apple Developer Portal?"),
+                        message: Text(String(format: NSLocalizedString("Are you sure you want to delete '%@' (%@) from Apple Developer Portal?", comment: ""), group.name, group.groupIdentifier)),
                         primaryButton: .destructive(Text("Delete")) {
                             Task {
                                 let success = await viewModel.deleteAppGroup(group, presentingViewController: presentingViewController)
@@ -242,7 +242,7 @@ struct AppGroupsListView: View {
         .alert(isPresented: $showDeleteConfirmation) {
             Alert(
                 title: Text("Delete App Group?"),
-                message: Text("Are you sure you want to delete '\(groupToDelete?.name ?? "this App Group")' (\(groupToDelete?.groupIdentifier ?? "")) from Apple Developer Portal?"),
+                message: Text(String(format: NSLocalizedString("Are you sure you want to delete '%@' (%@) from Apple Developer Portal?", comment: ""), groupToDelete?.name ?? "this App Group", groupToDelete?.groupIdentifier ?? "")),
                 primaryButton: .destructive(Text("Delete")) {
                     if let target = groupToDelete {
                         Task {
