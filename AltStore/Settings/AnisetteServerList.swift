@@ -99,7 +99,7 @@ final class AnisetteViewModel: ObservableObject {
                 }
                 group.addTask {
                     try await Task.sleep(nanoseconds: 5_000_000_000)
-                    throw URLError(.timedOut, userInfo: [NSLocalizedDescriptionKey: "Server list fetch timed out after 5 seconds."])
+                    throw URLError(.timedOut, userInfo: [NSLocalizedDescriptionKey: NSLocalizedString("Server list fetch timed out after 5 seconds.", comment: "")])
                 }
                 guard let result = try await group.next() else {
                     throw URLError(.timedOut)
@@ -115,11 +115,11 @@ final class AnisetteViewModel: ObservableObject {
             let isOnline = await AnisetteServersManager.shared.isPublicInternetAvailable()
             let msg: String
             if !isOnline {
-                msg = "No Internet Connection. Please check your Wi-Fi or cellular network."
+                msg = NSLocalizedString("No Internet Connection. Please check your Wi-Fi or cellular network.", comment: "")
             } else if let urlErr = error as? URLError, urlErr.code == .timedOut {
-                msg = "Connection timed out (5s limit) while reaching '\(self.source)'."
+                msg = String(format: NSLocalizedString("Connection timed out (5s limit) while reaching '%@'.", comment: ""), self.source)
             } else {
-                msg = "Failed to fetch catalog from '\(self.source)': \(error.localizedDescription)"
+                msg = String(format: NSLocalizedString("Failed to fetch catalog from '%@': %@", comment: ""), self.source, error.localizedDescription)
             }
 
             self.isNoInternet = !isOnline
@@ -143,7 +143,7 @@ final class AnisetteViewModel: ObservableObject {
             self.importedFileName = filename
             debugLog("AnisetteViewModel: Imported servers from data: \(filename)")
         } catch {
-            self.errorMessage = "Failed to import file: \(error.localizedDescription)"
+            self.errorMessage = String(format: NSLocalizedString("Failed to import file: %@", comment: ""), error.localizedDescription)
             debugLog("AnisetteViewModel: Import error: \(error)")
         }
     }
@@ -172,7 +172,7 @@ final class AnisetteViewModel: ObservableObject {
             self.items = resetItems
             debugLog("AnisetteViewModel: Reset catalog to original uncustomized state.")
         } catch {
-            self.errorMessage = "Failed to reset: \(error.localizedDescription)"
+            self.errorMessage = String(format: NSLocalizedString("Failed to reset: %@", comment: ""), error.localizedDescription)
             debugLog("AnisetteViewModel: Reset error: \(error)")
         }
     }
@@ -277,7 +277,7 @@ struct AnisetteServersView: View {
                                 .font(.headline)
                                 .foregroundColor(.primary)
 
-                            Text("Reaching catalog source '\(viewModel.source)'...")
+                            Text(String(format: NSLocalizedString("Reaching catalog source '%@'...", comment: ""), viewModel.source))
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                                 .multilineTextAlignment(.center)
@@ -293,11 +293,11 @@ struct AnisetteServersView: View {
                                 .foregroundColor(.orange)
                                 .padding(.top, 4)
 
-                            Text(viewModel.isNoInternet ? "No Internet Connection" : "Could Not Reach Servers")
+                            Text(viewModel.isNoInternet ? NSLocalizedString("No Internet Connection", comment: "") : NSLocalizedString("Could Not Reach Servers", comment: ""))
                                 .font(.headline)
                                 .foregroundColor(.primary)
 
-                            Text(viewModel.errorMessage ?? "No servers available.")
+                            Text(viewModel.errorMessage ?? NSLocalizedString("No servers available.", comment: ""))
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                                 .multilineTextAlignment(.center)
@@ -334,7 +334,7 @@ struct AnisetteServersView: View {
                             UserDefaults.standard.synchronize()
                         } label: {
                             HStack(spacing: 12) {
-                                Text("#\(index + 1)")
+                                Text(String(format: NSLocalizedString("#%d", comment: ""), index + 1))
                                     .font(.subheadline.monospacedDigit().weight(.bold))
                                     .foregroundColor(.secondary)
                                     .frame(minWidth: 26, alignment: .leading)
@@ -377,7 +377,7 @@ struct AnisetteServersView: View {
                             SwiftUI.Button {
                                 viewModel.toggleHide(item: item)
                             } label: {
-                                Label(item.isHidden ? "Unhide" : "Hide", systemImage: item.isHidden ? "eye" : "eye.slash")
+                                Label(item.isHidden ? NSLocalizedString("Unhide", comment: "") : NSLocalizedString("Hide", comment: ""), systemImage: item.isHidden ? "eye" : "eye.slash")
                             }
                             .tint(item.isHidden ? .blue : .orange)
                         }
@@ -409,7 +409,7 @@ struct AnisetteServersView: View {
                         Text("Catalog File")
                             .foregroundColor(.primary)
                         Spacer()
-                        Text(viewModel.importedFileName ?? "Imported File")
+                        Text(viewModel.importedFileName ?? NSLocalizedString("Imported File", comment: ""))
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                     }
@@ -514,7 +514,7 @@ struct AnisetteServersView: View {
                             Text("Server Catalog Source")
                             Spacer()
                             if !viewModel.isOfflineMode {
-                                SwiftUI.Button(isEditingURL ? "Done" : "Edit") {
+                                SwiftUI.Button(isEditingURL ? NSLocalizedString("Done", comment: "") : NSLocalizedString("Edit", comment: "")) {
                                     if isEditingURL {
                                         isEditingURL = false
                                         let trimmed = editingURLText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -535,7 +535,7 @@ struct AnisetteServersView: View {
                         }
                     } footer: {
                         if viewModel.isOfflineMode {
-                            Text("Currently using imported file '\(viewModel.importedFileName ?? "custom.json")'. Press and hold row to export.")
+                            Text(String(format: NSLocalizedString("Currently using imported file '%@'. Press and hold row to export.", comment: ""), viewModel.importedFileName ?? "custom.json"))
                         } else {
                             Text("URL of the JSON file containing registered Anisette servers. Press and hold row to export.")
                         }
@@ -614,7 +614,7 @@ struct AnisetteServersView: View {
                         SwiftUI.Button {
                             viewModel.showHiddenServers.toggle()
                         } label: {
-                            Label(viewModel.showHiddenServers ? "Hide Hidden" : "Show Hidden", systemImage: viewModel.showHiddenServers ? "eye.slash" : "eye")
+                            Label(viewModel.showHiddenServers ? NSLocalizedString("Hide Hidden", comment: "") : NSLocalizedString("Show Hidden", comment: ""), systemImage: viewModel.showHiddenServers ? "eye.slash" : "eye")
                         }
                     }
 
@@ -664,7 +664,7 @@ struct AnisetteServersView: View {
         #if os(tvOS)
         .confirmationDialog("Options", isPresented: $showingTvOptionsMenu) {
             if viewModel.hasHiddenItems {
-                SwiftUI.Button(viewModel.showHiddenServers ? "Hide Hidden" : "Show Hidden") {
+                SwiftUI.Button(viewModel.showHiddenServers ? NSLocalizedString("Hide Hidden", comment: "") : NSLocalizedString("Show Hidden", comment: "")) {
                     viewModel.showHiddenServers.toggle()
                 }
             }
@@ -708,11 +708,11 @@ struct AnisetteServersView: View {
                         pendingImportName = url.lastPathComponent
                         showingImportAlert = true
                     } catch {
-                        viewModel.errorMessage = "Failed to read file: \(error.localizedDescription)"
+                        viewModel.errorMessage = String(format: NSLocalizedString("Failed to read file: %@", comment: ""), error.localizedDescription)
                     }
                 }
             case .failure(let error):
-                viewModel.errorMessage = "Import failed: \(error.localizedDescription)"
+                viewModel.errorMessage = String(format: NSLocalizedString("Import failed: %@", comment: ""), error.localizedDescription)
             }
         }
         #endif
@@ -724,7 +724,7 @@ struct AnisetteServersView: View {
             }
             SwiftUI.Button("Cancel", role: .cancel) {}
         } message: {
-            Text("Are you sure you want to remove the imported catalog '\(viewModel.importedFileName ?? "custom.json")' and return to the default server URL?")
+            Text(String(format: NSLocalizedString("Are you sure you want to remove the imported catalog '%@' and return to the default server URL?", comment: ""), viewModel.importedFileName ?? "custom.json"))
         }
         .alert("Import Server Catalog?", isPresented: $showingImportAlert) {
             SwiftUI.Button("Import") {
@@ -736,7 +736,7 @@ struct AnisetteServersView: View {
             }
             SwiftUI.Button("Cancel", role: .cancel) {}
         } message: {
-            Text("This will replace your current server catalog with the servers from '\(pendingImportName ?? "selected file")'. Do you want to proceed?")
+            Text(String(format: NSLocalizedString("This will replace your current server catalog with the servers from '%@'. Do you want to proceed?", comment: ""), pendingImportName ?? "selected file"))
         }
         .sheet(isPresented: $showingShareSheet) {
             if let fileURL = exportFileURL {

@@ -161,7 +161,7 @@ private struct ActiveAppsWidgetView: View
                                 }
                                 else
                                 {
-                                    Text("Expires in \(daysRemaining) ") + (daysRemaining == 1 ? Text("day") : Text("days"))
+                                    daysRemaining == 1 ? Text("Expires in 1 day") : Text("Expires in \(daysRemaining) days")
                                 }
                                 
                                 text
