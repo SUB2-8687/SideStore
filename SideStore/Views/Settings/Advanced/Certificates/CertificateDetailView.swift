@@ -70,7 +70,7 @@ struct CertificateDetailView: View {
                         detailRow(title: "Type Name", value: typeName)
                     }
                     if let managed = portalMetadata?.isManaged ?? certificate.isManaged {
-                        detailRow(title: "Managed", value: managed ? "Yes (Xcode Cloud)" : "No")
+                        detailRow(title: "Managed", value: managed ? NSLocalizedString("Yes (Xcode Cloud)", comment: "") : NSLocalizedString("No", comment: ""))
                     }
                     if let status = portalMetadata?.status ?? certificate.status {
                         detailRow(title: "Status", value: status)
@@ -133,7 +133,7 @@ struct CertificateDetailView: View {
                                 .tint(.accentColor)
                         }
                         
-                        detailRow(title: "Validity Days", value: "Total: \(stats.totalDays), Elapsed: \(stats.elapsedDays), Remaining: \(stats.remainingDays)")
+                        detailRow(title: "Validity Days", value: String(format: NSLocalizedString("Total: %d, Elapsed: %d, Remaining: %d", comment: ""), stats.totalDays, stats.elapsedDays, stats.remainingDays))
                     } header: {
                         Text("Validity Period")
                     }
@@ -337,11 +337,11 @@ struct CertificateDetailView: View {
     
     private func detailRow(title: String, value: String) -> some View {
         HStack {
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.subheadline)
                 .foregroundColor(.primary)
             Spacer()
-            Text(value)
+            Text(NSLocalizedString(value, comment: ""))
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.trailing)
@@ -353,7 +353,7 @@ struct CertificateDetailView: View {
     
     private func detailRowWithCopy(title: String, value: String, isCopied: Binding<Bool>) -> some View {
         HStack {
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.subheadline)
                 .foregroundColor(.primary)
             Spacer()

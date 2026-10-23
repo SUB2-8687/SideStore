@@ -67,9 +67,9 @@ struct ProfilePortalDetailView: View {
                     InfoRow(label: "Type", value: rawType)
                 }
                 if let isTeam = profile.isTeamProfile {
-                    InfoRow(label: "Managed By", value: isTeam ? "Xcode (Team Profile)" : "Manual (Portal)")
+                    InfoRow(label: "Managed By", value: isTeam ? NSLocalizedString("Xcode (Team Profile)", comment: "") : NSLocalizedString("Manual (Portal)", comment: ""))
                 }
-                InfoRow(label: "Status", value: isExpired ? "Expired" : (profile.status ?? "Active"), valueColor: isExpired ? .red : .primary)
+                InfoRow(label: "Status", value: isExpired ? NSLocalizedString("Expired", comment: "") : (profile.status ?? NSLocalizedString("Active", comment: "")), valueColor: isExpired ? .red : .primary)
                 InfoRow(label: "Expiration Date", value: formatDate(profile.dateExpire), valueColor: isExpired ? .red : .primary)
             }
 
@@ -78,7 +78,7 @@ struct ProfilePortalDetailView: View {
                     Picker("Team App ID", selection: $selectedAppIDId) {
                         Text("Choose App ID").tag("")
                         ForEach(viewModel.appIDs, id: \.identifier) { appID in
-                            Text("\(appID.name) (\(appID.bundleIdentifier))").tag(appID.identifier)
+                            Text(String(format: NSLocalizedString("%@ (%@)", comment: ""), appID.name, appID.bundleIdentifier)).tag(appID.identifier)
                         }
                     }
                 }
@@ -92,7 +92,7 @@ struct ProfilePortalDetailView: View {
                 }
             }
 
-            Section(header: Text("Associated Certificates (\(selectedCertificateIDs.count))"), footer: Text("Select which certificates are authorized to sign with this profile, or add custom certificate IDs.")) {
+            Section(header: Text(String(format: NSLocalizedString("Associated Certificates (%d)", comment: ""), selectedCertificateIDs.count)), footer: Text("Select which certificates are authorized to sign with this profile, or add custom certificate IDs.")) {
                 if viewModel.certificates.isEmpty {
                     Text("No certificates found on this team.")
                         .foregroundColor(.secondary)
@@ -112,12 +112,12 @@ struct ProfilePortalDetailView: View {
                                     Text(cert.commonName ?? cert.name)
                                         .font(.subheadline)
                                         .foregroundColor(.primary)
-                                    Text("Serial: \(cert.serialNumber)")
+                                    Text(String(format: NSLocalizedString("Serial: %@", comment: ""), cert.serialNumber))
                                         .font(.caption2)
                                         .foregroundColor(.secondary)
                                     let hasKey = ProfileManager.shared.hasPrivateKey(for: cert)
                                     HStack(spacing: 4) {
-                                        Text("Type: \(hasKey ? "public + private" : "public only")")
+                                        Text(String(format: NSLocalizedString("Type: %@", comment: ""), NSLocalizedString(hasKey ? "public + private" : "public only", comment: "")))
                                             .font(.caption2)
                                             .foregroundColor(hasKey ? .green : .secondary)
                                         if hasKey {
@@ -153,10 +153,10 @@ struct ProfilePortalDetailView: View {
             }
 
             Section(header: HStack {
-                Text("Associated Devices (\(selectedDeviceIDs.count))")
+                Text(String(format: NSLocalizedString("Associated Devices (%d)", comment: ""), selectedDeviceIDs.count))
                 Spacer()
                 if !viewModel.devices.isEmpty {
-                    SwiftUI.Button(selectedDeviceIDs.count >= viewModel.devices.count ? "Deselect All" : "Select All") {
+                    SwiftUI.Button(selectedDeviceIDs.count >= viewModel.devices.count ? NSLocalizedString("Deselect All", comment: "") : NSLocalizedString("Select All", comment: "")) {
                         if selectedDeviceIDs.count >= viewModel.devices.count {
                             selectedDeviceIDs.removeAll()
                         } else {
@@ -319,7 +319,7 @@ struct ProfilePortalDetailView: View {
         .alert(isPresented: $showDeleteAlert) {
             Alert(
                 title: Text("Delete Provisioning Profile?"),
-                message: Text("Are you sure you want to delete '\(profile.name)' from the Apple Developer Portal?"),
+                message: Text(String(format: NSLocalizedString("Are you sure you want to delete '%@' from the Apple Developer Portal?", comment: ""), profile.name)),
                 primaryButton: .destructive(Text("Delete")) {
                     Task {
                         let success = await viewModel.deleteProfile(profile, presentingViewController: presentingViewController)

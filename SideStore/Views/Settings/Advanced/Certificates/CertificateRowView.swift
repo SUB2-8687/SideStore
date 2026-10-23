@@ -69,7 +69,7 @@ struct CertificateRowView: View {
                 
                 (
                     Text("Keys: ").font(.system(size: 10))
-                    + Text(hasPrivateKey ? "public + private" : "public").font(.system(size: 10))
+                    + Text(hasPrivateKey ? NSLocalizedString("public + private", comment: "") : NSLocalizedString("public", comment: "")).font(.system(size: 10))
                 )
                 .foregroundColor(.secondary)
             }
@@ -83,7 +83,7 @@ struct CertificateRowView: View {
         .contextMenu {
             let isMasked = viewModel.isSerialMasked(for: cert)
             SwiftUI.Button { toggleReveal() } label: {
-                Label(isMasked ? "Reveal Details" : "Hide Details",
+                Label(isMasked ? NSLocalizedString("Reveal Details", comment: "") : NSLocalizedString("Hide Details", comment: ""),
                       systemImage: isMasked ? "eye" : "eye.slash")
             }
             if hasPrivateKey && !isActive {
@@ -176,7 +176,7 @@ private struct CertTrailingIcons: View {
 }
 
 private struct AdaptiveMenu<Content: View>: View {
-    let title: String
+    let title: LocalizedStringKey
     let systemImage: String
     @ViewBuilder let content: () -> Content
     

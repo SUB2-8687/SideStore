@@ -148,7 +148,7 @@ final class BonjourDiscoveryViewModel: ObservableObject {
             }
             return keys.map { DomainSection(id: "group_\($0)", title: "\($0) (\(grouped[$0]?.count ?? 0))", items: grouped[$0] ?? []) }
         } else {
-            return [DomainSection(id: "all_domains", title: "Browsable Domains", items: sorted)]
+            return [DomainSection(id: "all_domains", title: NSLocalizedString("Browsable Domains", comment: ""), items: sorted)]
         }
     }
     
@@ -167,7 +167,7 @@ final class BonjourDiscoveryViewModel: ObservableObject {
         
         switch serviceTypeGroupOption {
         case .none:
-            let title = "\(serviceTypes.count) Service\(serviceTypes.count == 1 ? "" : "s") Found"
+            let title = String(format: NSLocalizedString("%d Service(s) Found", comment: ""), serviceTypes.count)
             return [ServiceTypeSection(id: "all_types", title: title, items: sorted)]
             
         case .protocolType:
@@ -177,13 +177,13 @@ final class BonjourDiscoveryViewModel: ObservableObject {
             
             var sections: [ServiceTypeSection] = []
             if !tcpItems.isEmpty {
-                sections.append(ServiceTypeSection(id: "tcp_types", title: "TCP Services (\(tcpItems.count))", items: tcpItems))
+                sections.append(ServiceTypeSection(id: "tcp_types", title: String(format: NSLocalizedString("TCP Services (%d)", comment: ""), tcpItems.count), items: tcpItems))
             }
             if !udpItems.isEmpty {
-                sections.append(ServiceTypeSection(id: "udp_types", title: "UDP Services (\(udpItems.count))", items: udpItems))
+                sections.append(ServiceTypeSection(id: "udp_types", title: String(format: NSLocalizedString("UDP Services (%d)", comment: ""), udpItems.count), items: udpItems))
             }
             if !otherItems.isEmpty {
-                sections.append(ServiceTypeSection(id: "other_types", title: "Other Services (\(otherItems.count))", items: otherItems))
+                sections.append(ServiceTypeSection(id: "other_types", title: String(format: NSLocalizedString("Other Services (%d)", comment: ""), otherItems.count), items: otherItems))
             }
             return sections
             
@@ -193,10 +193,10 @@ final class BonjourDiscoveryViewModel: ObservableObject {
             
             var sections: [ServiceTypeSection] = []
             if !recognized.isEmpty {
-                sections.append(ServiceTypeSection(id: "recognized_types", title: "Recognized Services (\(recognized.count))", items: recognized))
+                sections.append(ServiceTypeSection(id: "recognized_types", title: String(format: NSLocalizedString("Recognized Services (%d)", comment: ""), recognized.count), items: recognized))
             }
             if !unknown.isEmpty {
-                sections.append(ServiceTypeSection(id: "unknown_types", title: "Other / Raw Services (\(unknown.count))", items: unknown))
+                sections.append(ServiceTypeSection(id: "unknown_types", title: String(format: NSLocalizedString("Other / Raw Services (%d)", comment: ""), unknown.count), items: unknown))
             }
             return sections
             
@@ -224,7 +224,7 @@ final class BonjourDiscoveryViewModel: ObservableObject {
         
         switch instanceGroupOption {
         case .none:
-            let title = "\(instances.count) Instance\(instances.count == 1 ? "" : "s")"
+            let title = String(format: NSLocalizedString("%d Instance(s)", comment: ""), instances.count)
             return [ServiceInstanceSection(id: "all_instances", title: title, items: sorted)]
             
         case .ipVersion:
@@ -305,13 +305,13 @@ final class BonjourDiscoveryViewModel: ObservableObject {
             let clean = raw.strippingInterfaceScope
             let label: String = {
                 if !clean.contains(":") {
-                    return "IPv4 Address"
+                    return NSLocalizedString("IPv4 Address", comment: "")
                 } else if raw.lowercased().hasPrefix("fe80:") || raw.contains("%") {
-                    return "IPv6 Address (Link-Local)"
+                    return NSLocalizedString("IPv6 Address (Link-Local)", comment: "")
                 } else if clean.lowercased().hasPrefix("fd") || clean.lowercased().hasPrefix("fc") {
-                    return "IPv6 Address (Unique-Local)"
+                    return NSLocalizedString("IPv6 Address (Unique-Local)", comment: "")
                 } else {
-                    return "IPv6 Address"
+                    return NSLocalizedString("IPv6 Address", comment: "")
                 }
             }()
             return DiscoveredAddressItem(
@@ -523,11 +523,11 @@ final class BonjourDiscoveryViewModel: ObservableObject {
     static func portCategory(for port: UInt16) -> String {
         switch port {
         case 0...1023:
-            return "Well-Known Port"
+            return NSLocalizedString("Well-Known Port", comment: "")
         case 1024...49151:
-            return "Registered Port"
+            return NSLocalizedString("Registered Port", comment: "")
         default:
-            return "Dynamic / Ephemeral Port"
+            return NSLocalizedString("Dynamic / Ephemeral Port", comment: "")
         }
     }
     
@@ -625,10 +625,10 @@ final class BonjourDiscoveryViewModel: ObservableObject {
     
     static func nameForInterfaceType(_ type: NWInterface.InterfaceType) -> String {
         switch type {
-        case .wifi:             return "Wi-Fi"
-        case .loopback:         return "Loopback"
-        case .wiredEthernet:    return "Ethernet"
-        case .cellular:         return "Cellular"
+        case .wifi:             return NSLocalizedString("Wi-Fi", comment: "")
+        case .loopback:         return NSLocalizedString("Loopback", comment: "")
+        case .wiredEthernet:    return NSLocalizedString("Ethernet", comment: "")
+        case .cellular:         return NSLocalizedString("Cellular", comment: "")
         default:                return "\(type)"
         }
     }

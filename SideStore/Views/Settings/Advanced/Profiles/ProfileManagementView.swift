@@ -110,7 +110,7 @@ struct ProfileManagementView: View {
                             }
                             .padding(.vertical, 8)
                         } else {
-                            Text(searchText.isEmpty ? "No provisioning profiles installed. Tap '+' to import or pull to refresh." : "No matching provisioning profiles found.")
+                            Text(searchText.isEmpty ? NSLocalizedString("No provisioning profiles installed. Tap '+' to import or pull to refresh.", comment: "") : NSLocalizedString("No matching provisioning profiles found.", comment: ""))
                                 .foregroundColor(.secondary)
                                 .font(.subheadline)
                         }
@@ -225,7 +225,7 @@ struct ProfileManagementView: View {
                 defer { url.stopAccessingSecurityScopedResource() }
                 handleFileSelected(at: url)
             case .failure(let error):
-                viewModel.showToast("Import canceled: \(error.localizedDescription)")
+                viewModel.showToast(String(format: NSLocalizedString("Import canceled: %@", comment: ""), error.localizedDescription))
             }
         }
         .sheet(isPresented: Binding<Bool>(
@@ -354,7 +354,7 @@ struct ProfileManagementView: View {
             let analysis = ProfileManager.shared.analyzeCertificates(for: profile)
             self.pendingImport = PendingProfileImport(profile: profile, analysis: analysis)
         } catch {
-            viewModel.showToast("Invalid provisioning profile: \(error.localizedDescription)")
+            viewModel.showToast(String(format: NSLocalizedString("Invalid provisioning profile: %@", comment: ""), error.localizedDescription))
         }
     }
 
@@ -362,9 +362,9 @@ struct ProfileManagementView: View {
         do {
             _ = try ProfileManager.shared.importProfile(data: profile.data)
             viewModel.loadProfiles(isPullToRefresh: false)
-            viewModel.showToast("Imported '\(profile.name)' successfully")
+            viewModel.showToast(String(format: NSLocalizedString("Imported '%@' successfully", comment: ""), profile.name))
         } catch {
-            viewModel.showToast("Failed to import profile: \(error.localizedDescription)")
+            viewModel.showToast(String(format: NSLocalizedString("Failed to import profile: %@", comment: ""), error.localizedDescription))
         }
     }
 

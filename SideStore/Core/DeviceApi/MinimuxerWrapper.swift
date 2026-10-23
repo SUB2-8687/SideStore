@@ -207,7 +207,7 @@ public func isMinimuxerReady() async -> Result<Bool, MinimuxerError> {
 public func ensureMinimuxerReady() async throws {
     if CellularRefreshManager.shared.isEnabled && UserDefaults.standard.enableEMPforWireguard {
         throw OperationError.invalidVPN(
-            reason: "WireGuard VPN is not supported with Cellular Refresh because iOS pauses the WireGuard tunnel when cellular data is toggled off."
+            reason: NSLocalizedString("WireGuard VPN is not supported with Cellular Refresh because iOS pauses the WireGuard tunnel when cellular data is toggled off.", comment: "")
         )
     }
     if !CellularRefreshManager.shared.isEnabled {

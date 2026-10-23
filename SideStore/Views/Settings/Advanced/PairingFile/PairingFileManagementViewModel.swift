@@ -84,7 +84,7 @@ public final class PairingFileManagementViewModel: ObservableObject {
                     targetImportMode = nil
                     refresh()
                 } catch {
-                    activeAlert = .importError("Failed to import pairing file: \(error.localizedDescription)")
+                    activeAlert = .importError(String(format: NSLocalizedString("Failed to import pairing file: %@", comment: ""), error.localizedDescription))
                 }
                 return
             }
@@ -100,7 +100,7 @@ public final class PairingFileManagementViewModel: ObservableObject {
                 targetImportMode = nil
                 refresh()
             } catch {
-                activeAlert = .importError("Failed to import pairing file: \(error.localizedDescription)")
+                activeAlert = .importError(String(format: NSLocalizedString("Failed to import pairing file: %@", comment: ""), error.localizedDescription))
             }
         case .failure(let error):
             activeAlert = .importError(error.localizedDescription)
@@ -114,7 +114,7 @@ public final class PairingFileManagementViewModel: ObservableObject {
             targetImportMode = nil
             refresh()
         } catch {
-            activeAlert = .importError("Failed to import pairing file: \(error.localizedDescription)")
+            activeAlert = .importError(String(format: NSLocalizedString("Failed to import pairing file: %@", comment: ""), error.localizedDescription))
         }
     }
 
@@ -124,7 +124,7 @@ public final class PairingFileManagementViewModel: ObservableObject {
             targetImportMode = nil
             refresh()
         } catch {
-            activeAlert = .importError("Failed to import pairing file: \(error.localizedDescription)")
+            activeAlert = .importError(String(format: NSLocalizedString("Failed to import pairing file: %@", comment: ""), error.localizedDescription))
         }
     }
 
@@ -182,7 +182,7 @@ public final class PairingFileManagementViewModel: ObservableObject {
             refresh()
         } catch {
             debugLog("[PairingFileManagementViewModel] Failed to activate \(proto.rawValue): \(error)")
-            activeAlert = .importError("Failed to activate \(proto.rawValue): \(error.localizedDescription)")
+            activeAlert = .importError(String(format: NSLocalizedString("Failed to activate %@: %@", comment: ""), proto.rawValue, error.localizedDescription))
             refresh()
         }
     }

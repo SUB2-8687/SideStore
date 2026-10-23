@@ -27,7 +27,7 @@ struct MachOResourceViewer: View {
                     InfoRow(label: "Size", value: formatSize(url))
 
                     let archs = parser.architectures()
-                    InfoRow(label: "Architectures", value: archs.isEmpty ? "Unknown" : archs.joined(separator: ", "))
+                    InfoRow(label: "Architectures", value: archs.isEmpty ? NSLocalizedString("Unknown", comment: "") : archs.joined(separator: ", "))
 
                     if let platform = parser.platformType() {
                         InfoRow(label: "Platform", value: platform)
@@ -39,7 +39,7 @@ struct MachOResourceViewer: View {
 
                     InfoRow(
                         label: "Encrypted (DRM)",
-                        value: parser.isEncrypted() ? "Yes" : "No",
+                        value: parser.isEncrypted() ? NSLocalizedString("Yes", comment: "") : NSLocalizedString("No", comment: ""),
                         valueColor: parser.isEncrypted() ? .orange : .green
                     )
 
@@ -63,17 +63,17 @@ struct MachOResourceViewer: View {
 
                 let x509Certs = parser.x509Certificates()
                 if !x509Certs.isEmpty {
-                    Section(header: Text("Signatures & Certificates (\(x509Certs.count))")) {
+                    Section(header: Text(String(format: NSLocalizedString("Signatures & Certificates (%d)", comment: ""), x509Certs.count))) {
                         ForEach(Array(x509Certs.enumerated()), id: \.offset) { index, cert in
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(cert.name)
                                     .font(.subheadline)
                                     .foregroundColor(.primary)
-                                Text("Serial: \(cert.serialNumber)")
+                                Text(String(format: NSLocalizedString("Serial: %@", comment: ""), cert.serialNumber))
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                                 if cert.expiryDate != Date.distantPast {
-                                    Text("Expires: \(formatDate(cert.expiryDate))")
+                                    Text(String(format: NSLocalizedString("Expires: %@", comment: ""), formatDate(cert.expiryDate)))
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                 }
@@ -85,7 +85,7 @@ struct MachOResourceViewer: View {
 
                 if let ent = try? parser.entitlements(), !ent.isEmpty {
                     Section(header: Text("Entitlements")) {
-                        NavigationLink(destination: ResourceTextViewer(title: "Entitlements", explicitContent: ent)) {
+                        NavigationLink(destination: ResourceTextViewer(title: NSLocalizedString("Entitlements", comment: ""), explicitContent: ent)) {
                             HStack {
                                 Image(systemName: "lock.doc.fill")
                                     .foregroundColor(.green)
@@ -102,7 +102,7 @@ struct MachOResourceViewer: View {
 
                 let libs = parser.linkedLibraries()
                 if !libs.isEmpty {
-                    Section(header: Text("Linked Libraries (\(libs.count))")) {
+                    Section(header: Text(String(format: NSLocalizedString("Linked Libraries (%d)", comment: ""), libs.count))) {
                         ForEach(libs, id: \.self) { lib in
                             HStack(alignment: .top, spacing: 8) {
                                 Image(systemName: "cpu")
@@ -120,14 +120,14 @@ struct MachOResourceViewer: View {
 
                 let segs = parser.segments()
                 if !segs.isEmpty {
-                    Section(header: Text("Segments (\(segs.count))")) {
+                    Section(header: Text(String(format: NSLocalizedString("Segments (%d)", comment: ""), segs.count))) {
                         ForEach(segs, id: \.name) { seg in
                             HStack {
                                 Text(seg.name)
                                     .font(.system(size: 13, design: .monospaced))
                                     .fontWeight(.medium)
                                 Spacer()
-                                Text("offset: \(String(format: "0x%llX", seg.offset))  size: \(ByteCountFormatter.string(fromByteCount: Int64(seg.size), countStyle: .file))")
+                                Text(String(format: NSLocalizedString("offset: %@  size: %@", comment: ""), String(format: "0x%llX", seg.offset), ByteCountFormatter.string(fromByteCount: Int64(seg.size), countStyle: .file)))
                                     .font(.system(size: 11, design: .monospaced))
                                     .foregroundColor(.secondary)
                             }
@@ -136,7 +136,7 @@ struct MachOResourceViewer: View {
                 }
 
                 Section(header: Text("Raw Dump")) {
-                    NavigationLink(destination: ResourceTextViewer(title: "Mach-O Dump", explicitContent: dumpText)) {
+                    NavigationLink(destination: ResourceTextViewer(title: NSLocalizedString("Mach-O Dump", comment: ""), explicitContent: dumpText)) {
                         HStack {
                             Image(systemName: "doc.plaintext.fill")
                                 .foregroundColor(.blue)
@@ -152,7 +152,7 @@ struct MachOResourceViewer: View {
                         .foregroundColor(.orange)
                     Text("Invalid Mach-O Binary")
                         .font(.headline)
-                    Text("Could not parse \(url.lastPathComponent) as a valid Mach-O binary.")
+                    Text(String(format: NSLocalizedString("Could not parse %@ as a valid Mach-O binary.", comment: ""), url.lastPathComponent))
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
