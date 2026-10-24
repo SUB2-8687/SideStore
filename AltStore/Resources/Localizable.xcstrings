@@ -3542,7 +3542,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "인증서 (%d/%d)"
+            "value" : "인증서 (%1$d/%2$d)"
           }
         }
       }
@@ -5953,7 +5953,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "기기 (%d/%d)"
+            "value" : "기기 (%1$d/%2$d)"
           }
         }
       }
