@@ -86,7 +86,7 @@ class DeveloperServicesViewModel: ObservableObject {
         do {
             _ = try await DeveloperPortalProxy.shared.revokeCertificate(certificate)
             self.certificates.removeAll { $0.serialNumber == certificate.serialNumber }
-            self.showToastMessage("Revoked certificate '\(certificate.name)'")
+            self.showToastMessage(String(format: NSLocalizedString("Revoked certificate '%@'", comment: ""), certificate.name))
             return true
         } catch {
             debugLog("[DeveloperServices] revokeCertificate failed: \(error)")
@@ -115,7 +115,7 @@ class DeveloperServicesViewModel: ObservableObject {
             let newAppID = try await DeveloperPortalProxy.shared.addAppID(name: name, bundleIdentifier: bundleIdentifier)
             self.appIDs.append(newAppID)
             self.appIDs.sort { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
-            self.showToastMessage("Registered App ID '\(newAppID.name)'")
+            self.showToastMessage(String(format: NSLocalizedString("Registered App ID '%@'", comment: ""), newAppID.name))
             return true
         } catch {
             self.errorMessage = error.localizedDescription
@@ -129,7 +129,7 @@ class DeveloperServicesViewModel: ObservableObject {
         do {
             _ = try await DeveloperPortalProxy.shared.deleteAppID(appID)
             self.appIDs.removeAll { $0.identifier == appID.identifier }
-            self.showToastMessage("Deleted App ID '\(appID.name)'")
+            self.showToastMessage(String(format: NSLocalizedString("Deleted App ID '%@'", comment: ""), appID.name))
             return true
         } catch {
             self.errorMessage = error.localizedDescription
@@ -145,7 +145,7 @@ class DeveloperServicesViewModel: ObservableObject {
             if let idx = self.appIDs.firstIndex(where: { $0.identifier == appID.identifier }) {
                 self.appIDs[idx] = updated
             }
-            self.showToastMessage("Updated App Groups for '\(appID.name)'")
+            self.showToastMessage(String(format: NSLocalizedString("Updated App Groups for '%@'", comment: ""), appID.name))
             return true
         } catch {
             self.errorMessage = error.localizedDescription
@@ -177,7 +177,7 @@ class DeveloperServicesViewModel: ObservableObject {
                 _ = try await DeveloperPortalProxy.shared.downloadProvisioningProfile(for: appID, deviceType: DeveloperPortalProxy.currentDeviceType)
             }
             await self.fetchProfiles(presentingViewController: presentingViewController)
-            self.showToastMessage("Profile generated for '\(appID.name)'")
+            self.showToastMessage(String(format: NSLocalizedString("Profile generated for '%@'", comment: ""), appID.name))
             return true
         } catch {
             debugLog("[DeveloperServices] downloadProfile failed: \(error)")
@@ -192,7 +192,7 @@ class DeveloperServicesViewModel: ObservableObject {
         do {
             _ = try await DeveloperPortalProxy.shared.createProvisioningProfile(name: name, appID: appID, certificateIDs: certificateIDs, deviceIDs: deviceIDs, type: type)
             await self.fetchProfiles(presentingViewController: presentingViewController)
-            self.showToastMessage("Created profile '\(name)'")
+            self.showToastMessage(String(format: NSLocalizedString("Created profile '%@'", comment: ""), name))
             return true
         } catch {
             debugLog("[DeveloperServices] createManualProfile failed: \(error)")
@@ -228,7 +228,7 @@ class DeveloperServicesViewModel: ObservableObject {
                 )
             }
             await self.fetchProfiles(presentingViewController: presentingViewController)
-            self.showToastMessage("Updated profile '\(name)'")
+            self.showToastMessage(String(format: NSLocalizedString("Updated profile '%@'", comment: ""), name))
             return true
         } catch {
             debugLog("[DeveloperServices] updateProfile failed: \(error)")
@@ -264,7 +264,7 @@ class DeveloperServicesViewModel: ObservableObject {
         do {
             _ = try await DeveloperPortalProxy.shared.deleteProvisioningProfile(profileID: profileID)
             self.profiles.removeAll { $0.uuid == profile.uuid }
-            self.showToastMessage("Deleted profile '\(profile.name)'")
+            self.showToastMessage(String(format: NSLocalizedString("Deleted profile '%@'", comment: ""), profile.name))
             return true
         } catch {
             debugLog("[DeveloperServices] deleteProfile failed: \(error)")
@@ -293,7 +293,7 @@ class DeveloperServicesViewModel: ObservableObject {
                 }
             }
             await self.fetchProfiles(presentingViewController: presentingViewController)
-            self.showToastMessage("Purged \(deleted) profile(s)\(failed > 0 ? " (\(failed) failed)" : "")")
+            self.showToastMessage(failed > 0 ? String(format: NSLocalizedString("Purged %d profile(s) (%d failed)", comment: ""), deleted, failed) : String(format: NSLocalizedString("Purged %d profile(s)", comment: ""), deleted))
             return (deleted, failed)
         } catch {
             debugLog("[DeveloperServices] deleteAllProfiles failed: \(error)")
@@ -322,7 +322,7 @@ class DeveloperServicesViewModel: ObservableObject {
             let newGroup = try await DeveloperPortalProxy.shared.addAppGroup(name: name, groupIdentifier: groupIdentifier)
             self.appGroups.append(newGroup)
             self.appGroups.sort { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
-            self.showToastMessage("Created App Group '\(newGroup.name)'")
+            self.showToastMessage(String(format: NSLocalizedString("Created App Group '%@'", comment: ""), newGroup.name))
             return true
         } catch {
             self.errorMessage = error.localizedDescription
@@ -336,7 +336,7 @@ class DeveloperServicesViewModel: ObservableObject {
         do {
             _ = try await DeveloperPortalProxy.shared.deleteAppGroup(group)
             self.appGroups.removeAll { $0.identifier == group.identifier || $0.groupID == group.groupID }
-            self.showToastMessage("Deleted App Group '\(group.name)'")
+            self.showToastMessage(String(format: NSLocalizedString("Deleted App Group '%@'", comment: ""), group.name))
             return true
         } catch {
             self.errorMessage = error.localizedDescription
@@ -355,7 +355,7 @@ class DeveloperServicesViewModel: ObservableObject {
                 self.appGroups[idx] = updated
             }
             self.appGroups.sort { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
-            self.showToastMessage("Updated App Group '\(updated.name)'")
+            self.showToastMessage(String(format: NSLocalizedString("Updated App Group '%@'", comment: ""), updated.name))
             return true
         } catch {
             self.errorMessage = error.localizedDescription
@@ -383,7 +383,7 @@ class DeveloperServicesViewModel: ObservableObject {
             let newDev = try await DeveloperPortalProxy.shared.registerDevice(name: name, identifier: identifier, type: type)
             self.devices.append(newDev)
             self.devices.sort { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
-            self.showToastMessage("Registered Device '\(newDev.name)'")
+            self.showToastMessage(String(format: NSLocalizedString("Registered Device '%@'", comment: ""), newDev.name))
             return true
         } catch {
             self.errorMessage = error.localizedDescription
@@ -402,7 +402,7 @@ class DeveloperServicesViewModel: ObservableObject {
                 self.devices[idx] = updated
             }
             self.devices.sort { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
-            self.showToastMessage("Renamed Device to '\(updated.name)'")
+            self.showToastMessage(String(format: NSLocalizedString("Renamed Device to '%@'", comment: ""), updated.name))
             return true
         } catch {
             self.errorMessage = error.localizedDescription
@@ -418,7 +418,7 @@ class DeveloperServicesViewModel: ObservableObject {
             if let idx = self.devices.firstIndex(where: { $0.identifier == device.identifier }) {
                 self.devices[idx] = disabled
             }
-            self.showToastMessage("Disabled Device '\(device.name)'")
+            self.showToastMessage(String(format: NSLocalizedString("Disabled Device '%@'", comment: ""), device.name))
             return true
         } catch {
             self.errorMessage = error.localizedDescription
@@ -433,7 +433,7 @@ class DeveloperServicesViewModel: ObservableObject {
         do {
             _ = try await DeveloperPortalProxy.shared.deleteDevice(device)
             self.devices.removeAll { $0.identifier == device.identifier }
-            self.showToastMessage("Deleted Device '\(device.name)'")
+            self.showToastMessage(String(format: NSLocalizedString("Deleted Device '%@'", comment: ""), device.name))
             return true
         } catch {
             self.errorMessage = error.localizedDescription

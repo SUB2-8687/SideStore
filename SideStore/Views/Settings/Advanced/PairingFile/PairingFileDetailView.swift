@@ -163,7 +163,7 @@ struct PairingFileDetailView: View {
     private var xmlContentSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text(isEditing ? "EDIT RAW XML" : "RAW XML CONTENT")
+                Text(isEditing ? NSLocalizedString("EDIT RAW XML", comment: "") : NSLocalizedString("RAW XML CONTENT", comment: ""))
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundColor(Color.white.opacity(0.6))
                 Spacer()
@@ -208,11 +208,11 @@ struct PairingFileDetailView: View {
 
     private func metadataRow(label: String, value: String, valueColor: Color = .white) -> some View {
         HStack {
-            Text(label)
+            Text(NSLocalizedString(label, comment: ""))
                 .font(.system(size: 15))
                 .foregroundColor(Color.white.opacity(0.7))
             Spacer()
-            Text(value)
+            Text(NSLocalizedString(value, comment: ""))
                 .font(.system(size: 15, weight: .medium))
                 .foregroundColor(valueColor)
         }
@@ -273,7 +273,7 @@ struct PairingFileDetailView: View {
 
     private func saveEditedContent() {
         guard let data = editedContent.data(using: .utf8) else {
-            invalidPlistMessage = "Could not encode text as UTF-8."
+            invalidPlistMessage = NSLocalizedString("Could not encode text as UTF-8.", comment: "")
             showingInvalidPlistAlert = true
             return
         }
@@ -281,7 +281,7 @@ struct PairingFileDetailView: View {
         do {
             _ = try PropertyListSerialization.propertyList(from: data, options: [], format: nil)
         } catch {
-            invalidPlistMessage = "The property list contains syntax errors: \(error.localizedDescription)"
+            invalidPlistMessage = String(format: NSLocalizedString("The property list contains syntax errors: %@", comment: ""), error.localizedDescription)
             showingInvalidPlistAlert = true
             return
         }
@@ -292,7 +292,7 @@ struct PairingFileDetailView: View {
             UserDefaults.standard.setPairingFileEditSuppressed(true, forHash: currentSHA256)
             isEditing = false
         } catch {
-            invalidPlistMessage = "Failed to save pairing file: \(error.localizedDescription)"
+            invalidPlistMessage = String(format: NSLocalizedString("Failed to save pairing file: %@", comment: ""), error.localizedDescription)
             showingInvalidPlistAlert = true
         }
     }
