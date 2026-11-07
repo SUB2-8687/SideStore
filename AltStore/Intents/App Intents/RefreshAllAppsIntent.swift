@@ -9,6 +9,11 @@
 import AppIntents
 import UIKit
 
+/// 만료 핸들러(@Sendable)에서 백그라운드 작업 ID를 안전하게 참조하기 위한 상자.
+private final class BackgroundTaskBox: @unchecked Sendable {
+    var id = UIBackgroundTaskIdentifier.invalid
+}
+
 // Shouldn't conform types we don't own to protocols we don't own, so make custom
 // NSError subclass that conforms to CustomLocalizedStringResourceConvertible instead.
 //
@@ -147,12 +152,12 @@ struct RefreshAllAppsIntent: AppIntent, CustomIntentMigratedAppIntent, Predictab
             options: [.userInitiated, .idleSystemSleepDisabled, .suddenTerminationDisabled],
             reason: "SideStore refresh all apps"
         )
+        let taskBox = BackgroundTaskBox()
         let backgroundTaskID = await MainActor.run { () -> UIBackgroundTaskIdentifier in
-            var taskID = UIBackgroundTaskIdentifier.invalid
-            taskID = UIApplication.shared.beginBackgroundTask(withName: "com.sidestore.RefreshAllAppsIntent") {
-                UIApplication.shared.endBackgroundTask(taskID)
+            taskBox.id = UIApplication.shared.beginBackgroundTask(withName: "com.sidestore.RefreshAllAppsIntent") {
+                UIApplication.shared.endBackgroundTask(taskBox.id)
             }
-            return taskID
+            return taskBox.id
         }
         defer {
             ProcessInfo.processInfo.endActivity(activity)
