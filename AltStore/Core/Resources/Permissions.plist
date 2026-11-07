@@ -246,6 +246,17 @@
 			<key>symbol</key>
 			<string>person.3</string>
 		</dict>
+		<key>application-identifier</key>
+		<dict>
+			<key>name</key>
+			<string>Application Identifier</string>
+			<key>description</key>
+			<string>Identifies the app with its Team ID and Bundle ID.</string>
+			<key>key</key>
+			<string>application-identifier</string>
+			<key>symbol</key>
+			<string>app.badge</string>
+		</dict>
 		<key>com.apple.developer.healthkit</key>
 		<dict>
 			<key>name</key>
@@ -268,7 +279,7 @@
 			<key>symbol</key>
 			<string>heart.text.square</string>
 		</dict>
-		<key>healthkit.background-delivery</key>
+		<key>com.apple.developer.healthkit.background-delivery</key>
 		<dict>
 			<key>name</key>
 			<string>Health - Background Updates</string>

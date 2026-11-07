@@ -193,7 +193,7 @@ struct AppPermissionsCard<Permission: AppPermissionProtocol>: View
             
             if let usageDescription = permission.usageDescription
             {
-                Text(usageDescription)
+                Text(NSLocalizedString(usageDescription, comment: ""))
                     .font(.subheadline)
                     .minimumScaleFactor(0.75)
             }

@@ -183,7 +183,8 @@ final class SettingsViewController: UITableViewController
     
     private func updateReleaseChannelButtonTitle() {
         let channel = UserDefaults.standard.betaUdpatesTrack ?? UserDefaults.defaultBetaUpdatesTrack
-        betaTrackPopupButton.setTitle(channel, for: .normal)
+        let displayTitle = ReleaseTrackType(rawValue: channel)?.displayName ?? channel
+        betaTrackPopupButton.setTitle(displayTitle, for: .normal)
     }
     
     private func configureReleaseChannelButton() {
@@ -199,7 +200,8 @@ final class SettingsViewController: UITableViewController
     
         // Create menu items with proper styling
         let items = trackOptions.map{ channel in
-            UIAction(title: channel, handler: { [weak self] _ in
+            let displayTitle = ReleaseTrackType(rawValue: channel)?.displayName ?? channel
+            return UIAction(title: displayTitle, handler: { [weak self] _ in
                 self?.handleReleaseChannelSelection(channel)
             })
         }
@@ -738,7 +740,7 @@ private extension SettingsViewController
                     guard UserDefaults.standard.recreateDatabaseOnNextStart else {
                         return
                     }
-                    let toast = ToastView(text: "Database Delete Scheduled on Next Launch", detailText: "App is closing in \(time) seconds...")
+                    let toast = ToastView(text: NSLocalizedString("Database Delete Scheduled on Next Launch", comment: ""), detailText: String(format: NSLocalizedString("App is closing in %d seconds...", comment: ""), time))
                     toast.tintColor = .altPrimary
                     toast.preferredDuration = 1
                     toast.show(in: self)
@@ -1221,21 +1223,21 @@ extension SettingsViewController
             switch row
             {
             case .sendFeedback:
-                let alertController = UIAlertController(title: "Send Feedback", message: "Choose a method to send feedback:", preferredStyle: .actionSheet)
-                
+                let alertController = UIAlertController(title: NSLocalizedString("Send Feedback", comment: ""), message: NSLocalizedString("Choose a method to send feedback:", comment: ""), preferredStyle: .actionSheet)
+
                 // Option 1: GitHub
                 alertController.addAction(UIAlertAction(title: "GitHub", style: .default) { _ in
                     self.openWebURL(AppConstants.URLs.sideStoreIssues, preferredTintColor: .altPrimary)
                 })
-                
+
                 // Option 2: Discord
                 alertController.addAction(UIAlertAction(title: "Discord", style: .default) { _ in
                     self.openWebURL(AppConstants.URLs.sideStoreDiscord, preferredTintColor: .altPrimary)
                 })
-                
+
                 #if !os(tvOS)
                 // Option 3: Mail
-                alertController.addAction(UIAlertAction(title: "Send Email", style: .default) { _ in
+                alertController.addAction(UIAlertAction(title: NSLocalizedString("Send Email", comment: ""), style: .default) { _ in
                     if MFMailComposeViewController.canSendMail() {
                         let mailViewController = MFMailComposeViewController()
                         mailViewController.mailComposeDelegate = self
@@ -1257,7 +1259,7 @@ extension SettingsViewController
                 #endif
                 
                 // Cancel action
-                alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+                alertController.addAction(.cancel)
                 
                 // For iPad: Set the source view if presenting on iPad to avoid crashes
                 if let popoverController = alertController.popoverPresentationController {
@@ -1297,7 +1299,7 @@ extension SettingsViewController
                     selected: UserDefaults.standard.menuAnisetteURL,
                     onResetAdiPb: { [weak self] in
                         guard let self = self else { return }
-                        ToastView(text: "Cleared adi.pb!", detailText: "You will need to log back into Apple ID in SideStore.")
+                        ToastView(text: NSLocalizedString("Cleared adi.pb!", comment: ""), detailText: NSLocalizedString("You will need to log back into Apple ID in SideStore.", comment: ""))
                             .show(in: self)
                     }
                 )
