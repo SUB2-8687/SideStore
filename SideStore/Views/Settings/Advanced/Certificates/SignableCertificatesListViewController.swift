@@ -29,11 +29,11 @@ struct SignableCertificateRowView: View {
     
     private var statusText: String? {
         if isAppCert && isActiveGlobal {
-            return "Current App & Active Global"
+            return NSLocalizedString("Current App & Active Global", comment: "")
         } else if isAppCert {
-            return "Current App"
+            return NSLocalizedString("Current App", comment: "")
         } else if isActiveGlobal {
-            return "Active Global"
+            return NSLocalizedString("Active Global", comment: "")
         }
         return nil
     }
@@ -77,7 +77,7 @@ struct SignableCertificateRowView: View {
                     
                     (
                         Text("Validity: ").font(.system(size: 10))
-                        + Text("\(brief.validFrom) - \(brief.validUntil)").font(.system(size: 10))
+                        + Text(String(format: NSLocalizedString("%@ - %@", comment: ""), brief.validFrom, brief.validUntil)).font(.system(size: 10))
                     )
                     .foregroundColor(Color(uiColor: .lightGray))
                 }
@@ -218,15 +218,17 @@ final class SignableCertificatesListViewController: UITableViewController {
             let validityStr = brief != nil ? "\(brief!.validFrom) - \(brief!.validUntil)" : "N/A"
             
             cell.textLabel?.numberOfLines = 0
-            cell.textLabel?.text = """
-            \(certName) [Machine: \(machineName)]\(isCurrent ? " (Current)" : "")
-            Serial: \(cert.serialNumber)
-            ID: \(cert.identifier ?? "N/A")
-            Type: \(typeStr)
-            Validity: \(validityStr)
-            Requester: \(cert.requesterEmail ?? "N/A")
-            Keys: public + private
-            """
+            let currentSuffix = isCurrent ? " " + NSLocalizedString("(Current)", comment: "") : ""
+            let notAvailable = NSLocalizedString("N/A", comment: "")
+            cell.textLabel?.text = [
+                "\(certName) [" + String(format: NSLocalizedString("Machine: %@", comment: ""), machineName) + "]" + currentSuffix,
+                String(format: NSLocalizedString("Serial: %@", comment: ""), cert.serialNumber),
+                String(format: NSLocalizedString("ID: %@", comment: ""), cert.identifier ?? notAvailable),
+                String(format: NSLocalizedString("Type: %@", comment: ""), typeStr),
+                String(format: NSLocalizedString("Validity: %@", comment: ""), validityStr),
+                String(format: NSLocalizedString("Requester: %@", comment: ""), cert.requesterEmail ?? notAvailable),
+                NSLocalizedString("Keys: public + private", comment: "")
+            ].joined(separator: "\n")
             cell.textLabel?.textColor = .white
             cell.textLabel?.font = .systemFont(ofSize: 12, weight: .regular)
             cell.backgroundColor = UIColor.white.withAlphaComponent(0.15)

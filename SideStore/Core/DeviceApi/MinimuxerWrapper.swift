@@ -207,13 +207,39 @@ public func isMinimuxerReady() async -> Result<Bool, MinimuxerError> {
 public func ensureMinimuxerReady() async throws {
     if CellularRefreshManager.shared.isEnabled && UserDefaults.standard.enableEMPforWireguard {
         throw OperationError.invalidVPN(
-            reason: "WireGuard VPN is not supported with Cellular Refresh because iOS pauses the WireGuard tunnel when cellular data is toggled off."
+            reason: NSLocalizedString("WireGuard VPN is not supported with Cellular Refresh because iOS pauses the WireGuard tunnel when cellular data is toggled off.", comment: "")
         )
     }
     if !CellularRefreshManager.shared.isEnabled {
-        try await withRemotePairingRetry {
-            if case .failure(let error) = await isMinimuxerReady() {
-                throw error.asOperationError
+        // 저전력 모드에서는 백그라운드 실행(단축어 자동화 등)이 느려져서 VPN 터널과 minimuxer 가 준비되기 전에
+        // 새로고침이 시작되어 바로 실패하는 경우가 있다. 일시적인 연결 오류는 잠시 기다리며 다시 확인한다.
+        let isLowPowerMode = ProcessInfo.processInfo.isLowPowerModeEnabled
+        let startupGrace: TimeInterval = isLowPowerMode ? 30 : 10   // minimuxer 시작 대기
+        let connectionGrace: TimeInterval = isLowPowerMode ? 30 : 0 // VPN/네트워크 연결 대기 (저전력 모드에서만)
+        let startedAt = Date()
+
+        while true {
+            do {
+                try await withRemotePairingRetry {
+                    if case .failure(let error) = await isMinimuxerReady() {
+                        throw error.asOperationError
+                    }
+                }
+                return
+            } catch let error as OperationError {
+                let elapsed = Date().timeIntervalSince(startedAt)
+                let grace: TimeInterval
+                switch error {
+                case .minimuxerNotStarted:
+                    grace = startupGrace
+                case .noVPN, .noConnection, .notReachable:
+                    grace = connectionGrace
+                default:
+                    grace = 0
+                }
+                guard elapsed < grace, !Task.isCancelled else { throw error }
+                debugLog("[SideStore] Minimuxer not ready yet (\(error)); retrying... elapsed=\(String(format: "%.1f", elapsed))s, lowPowerMode=\(isLowPowerMode)")
+                try await Task.sleep(nanoseconds: 1_000_000_000)
             }
         }
     }

@@ -198,7 +198,10 @@ final class SelectProfileViewController: UITableViewController {
             }
         } else {
             cell.textLabel?.numberOfLines = 0
-            cell.textLabel?.text = "\(profile.name)\(isCurrent ? " (Current)" : "")\nBundle ID: \(profile.bundleIdentifier)\nExpires: \(profile.expirationDate)"
+            let currentSuffix = isCurrent ? " " + NSLocalizedString("(Current)", comment: "") : ""
+            let bundleLine = String(format: NSLocalizedString("Bundle ID: %@", comment: ""), profile.bundleIdentifier)
+            let expiresLine = String(format: NSLocalizedString("Expires: %@", comment: ""), "\(profile.expirationDate)")
+            cell.textLabel?.text = "\(profile.name)\(currentSuffix)\n\(bundleLine)\n\(expiresLine)"
             cell.accessoryType = isCurrent ? .checkmark : .none
         }
 
