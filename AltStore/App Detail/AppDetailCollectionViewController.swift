@@ -211,6 +211,7 @@ private extension AppDetailCollectionViewController
                                    description: "\(self.app.name) may request access to the following:",
                                    tintColor: Color(uiColor: self.app.tintColor ?? .altPrimary),
                                    permissions: self.privacyPermissions)
+                .appLanguageEnvironment()
             }
             .margins(.horizontal, 0)
         }

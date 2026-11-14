@@ -183,7 +183,8 @@ final class SettingsViewController: UITableViewController
     
     private func updateReleaseChannelButtonTitle() {
         let channel = UserDefaults.standard.betaUdpatesTrack ?? UserDefaults.defaultBetaUpdatesTrack
-        betaTrackPopupButton.setTitle(channel, for: .normal)
+        let displayTitle = ReleaseTrackType(rawValue: channel)?.displayName ?? channel
+        betaTrackPopupButton.setTitle(displayTitle, for: .normal)
     }
     
     private func configureReleaseChannelButton() {
@@ -199,7 +200,8 @@ final class SettingsViewController: UITableViewController
     
         // Create menu items with proper styling
         let items = trackOptions.map{ channel in
-            UIAction(title: channel, handler: { [weak self] _ in
+            let displayTitle = ReleaseTrackType(rawValue: channel)?.displayName ?? channel
+            return UIAction(title: displayTitle, handler: { [weak self] _ in
                 self?.handleReleaseChannelSelection(channel)
             })
         }
@@ -738,7 +740,7 @@ private extension SettingsViewController
                     guard UserDefaults.standard.recreateDatabaseOnNextStart else {
                         return
                     }
-                    let toast = ToastView(text: "Database Delete Scheduled on Next Launch", detailText: "App is closing in \(time) seconds...")
+                    let toast = ToastView(text: NSLocalizedString("Database Delete Scheduled on Next Launch", comment: ""), detailText: String(format: NSLocalizedString("App is closing in %d seconds...", comment: ""), time))
                     toast.tintColor = .altPrimary
                     toast.preferredDuration = 1
                     toast.show(in: self)
@@ -1130,6 +1132,16 @@ extension SettingsViewController
 
 extension SettingsViewController
 {
+    /// 언어 변경 후 화면을 다시 만든 뒤, '사용자 지정 항목' 화면을 프로그램으로 다시 연다.
+    func openUserCustomizations()
+    {
+        self.loadViewIfNeeded()
+        guard let section = Section.allCases.firstIndex(of: .advancedSettings),
+              let row = AdvancedSettingsRow.allCases.firstIndex(of: .userCustomizations)
+        else { return }
+        self.tableView(self.tableView, didSelectRowAt: IndexPath(row: row, section: section))
+    }
+
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath)
     {
         let section = Section.allCases[indexPath.section]
@@ -1162,7 +1174,7 @@ extension SettingsViewController
             {
             case .healthCheck:
                 let healthCheckView = HealthCheckView()
-                let vc = UIHostingController(rootView: healthCheckView)
+                let vc = UIHostingController(rootView: healthCheckView.appLanguageEnvironment())
                 
                 #if !os(tvOS)
                 let appearance = UINavigationBarAppearance()
@@ -1187,11 +1199,11 @@ extension SettingsViewController
                     if let url = url {
                         verboseLog("[SettingsVC] Creating DirectoryExplorerView for: \(url.path)")
                         let view = DirectoryExplorerView(url: url, onSelectFolder: onSelectFolder)
-                        return UIHostingController(rootView: view)
+                        return UIHostingController(rootView: view.appLanguageEnvironment())
                     } else {
                         verboseLog("[SettingsVC] Creating root StorageExplorerView")
                         let view = StorageExplorerView(onSelectFolder: onSelectFolder)
-                        return UIHostingController(rootView: view)
+                        return UIHostingController(rootView: view.appLanguageEnvironment())
                     }
                 }
                 let vc = makeExplorerVC()
@@ -1221,21 +1233,21 @@ extension SettingsViewController
             switch row
             {
             case .sendFeedback:
-                let alertController = UIAlertController(title: "Send Feedback", message: "Choose a method to send feedback:", preferredStyle: .actionSheet)
-                
+                let alertController = UIAlertController(title: NSLocalizedString("Send Feedback", comment: ""), message: NSLocalizedString("Choose a method to send feedback:", comment: ""), preferredStyle: .actionSheet)
+
                 // Option 1: GitHub
                 alertController.addAction(UIAlertAction(title: "GitHub", style: .default) { _ in
                     self.openWebURL(AppConstants.URLs.sideStoreIssues, preferredTintColor: .altPrimary)
                 })
-                
+
                 // Option 2: Discord
                 alertController.addAction(UIAlertAction(title: "Discord", style: .default) { _ in
                     self.openWebURL(AppConstants.URLs.sideStoreDiscord, preferredTintColor: .altPrimary)
                 })
-                
+
                 #if !os(tvOS)
                 // Option 3: Mail
-                alertController.addAction(UIAlertAction(title: "Send Email", style: .default) { _ in
+                alertController.addAction(UIAlertAction(title: NSLocalizedString("Send Email", comment: ""), style: .default) { _ in
                     if MFMailComposeViewController.canSendMail() {
                         let mailViewController = MFMailComposeViewController()
                         mailViewController.mailComposeDelegate = self
@@ -1257,7 +1269,7 @@ extension SettingsViewController
                 #endif
                 
                 // Cancel action
-                alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+                alertController.addAction(.cancel)
                 
                 // For iPad: Set the source view if presenting on iPad to avoid crashes
                 if let popoverController = alertController.popoverPresentationController {
@@ -1270,7 +1282,7 @@ extension SettingsViewController
                 
             case .refreshSideJITServer:
                 let jitConfigView = SideJITServerConfigView()
-                let vc = UIHostingController(rootView: jitConfigView)
+                let vc = UIHostingController(rootView: jitConfigView.appLanguageEnvironment())
                 #if !os(tvOS)
                 let appearance = UINavigationBarAppearance()
                 appearance.configureWithDefaultBackground()
@@ -1282,7 +1294,7 @@ extension SettingsViewController
                 
             case .pairingFileManagement:
                 let pairingView = PairingFileManagementView()
-                let vc = UIHostingController(rootView: pairingView)
+                let vc = UIHostingController(rootView: pairingView.appLanguageEnvironment())
                 #if !os(tvOS)
                 let appearance = UINavigationBarAppearance()
                 appearance.configureWithDefaultBackground()
@@ -1297,17 +1309,17 @@ extension SettingsViewController
                     selected: UserDefaults.standard.menuAnisetteURL,
                     onResetAdiPb: { [weak self] in
                         guard let self = self else { return }
-                        ToastView(text: "Cleared adi.pb!", detailText: "You will need to log back into Apple ID in SideStore.")
+                        ToastView(text: NSLocalizedString("Cleared adi.pb!", comment: ""), detailText: NSLocalizedString("You will need to log back into Apple ID in SideStore.", comment: ""))
                             .show(in: self)
                     }
                 )
                 
-                let vc = UIHostingController(rootView: anisetteServersView)
+                let vc = UIHostingController(rootView: anisetteServersView.appLanguageEnvironment())
                 self.prepare(for: UIStoryboardSegue(identifier: "anisetteServers", source: self, destination: vc), sender: nil)
 
             case .connectionConfig:
                 let connectionConfigView = ConnectionConfigView()
-                let vc = UIHostingController(rootView: connectionConfigView)
+                let vc = UIHostingController(rootView: connectionConfigView.appLanguageEnvironment())
 
                 #if !os(tvOS)
                 let appearance = UINavigationBarAppearance()
@@ -1320,36 +1332,36 @@ extension SettingsViewController
 
             case .networkDiscovery:
                 let discoveryView = BonjourDiscoveryView()
-                let vc = UIHostingController(rootView: discoveryView)
+                let vc = UIHostingController(rootView: discoveryView.appLanguageEnvironment())
                 vc.view.backgroundColor = .settingsBackground
                 vc.title = NSLocalizedString("Network Discovery", comment: "")
                 self.prepare(for: UIStoryboardSegue(identifier: "diagnostics", source: self, destination: vc), sender: nil)
 
             case .developerServices:
                 let developerServicesView = DeveloperServicesView(presentingViewController: self)
-                let vc = UIHostingController(rootView: developerServicesView)
+                let vc = UIHostingController(rootView: developerServicesView.appLanguageEnvironment())
                 self.prepare(for: UIStoryboardSegue(identifier: "developerServices", source: self, destination: vc), sender: nil)
 
             case .profileManagement:
                 let profileManagementView = ProfileManagementView(presentingViewController: self)
-                let vc = UIHostingController(rootView: profileManagementView)
+                let vc = UIHostingController(rootView: profileManagementView.appLanguageEnvironment())
                 self.prepare(for: UIStoryboardSegue(identifier: "profileManagement", source: self, destination: vc), sender: nil)
 
             case .certificateManagement:
                 let certificateManagementView = CertificatesView(presentingViewController: self)
-                let vc = UIHostingController(rootView: certificateManagementView)
+                let vc = UIHostingController(rootView: certificateManagementView.appLanguageEnvironment())
                 self.prepare(for: UIStoryboardSegue(identifier: "certificateManagement", source: self, destination: vc), sender: nil)
                 
             case .backupAndRestore:
                 let backupView = BackupAndRestoreView()
-                let vc = UIHostingController(rootView: backupView)
+                let vc = UIHostingController(rootView: backupView.appLanguageEnvironment())
                 vc.view.backgroundColor = .settingsBackground
                 vc.title = NSLocalizedString("Backup & Restore", comment: "")
                 self.prepare(for: UIStoryboardSegue(identifier: "diagnostics", source: self, destination: vc), sender: nil)
                 
             case .userCustomizations:
                 let userCustomizationsView = UserCustomizationsView()
-                let vc = UIHostingController(rootView: userCustomizationsView)
+                let vc = UIHostingController(rootView: userCustomizationsView.appLanguageEnvironment(rebuildsOnChange: false))
                 vc.view.backgroundColor = .settingsBackground
                 vc.title = NSLocalizedString("User Customizations", comment: "")
                 self.prepare(for: UIStoryboardSegue(identifier: "diagnostics", source: self, destination: vc), sender: nil)
@@ -1362,13 +1374,13 @@ extension SettingsViewController
             switch row {
             case .developerOptions:
                 let developerOptionsView = DeveloperOptionsView()
-                let hostingController = UIHostingController(rootView: developerOptionsView)
+                let hostingController = UIHostingController(rootView: developerOptionsView.appLanguageEnvironment())
                 hostingController.view.backgroundColor = .settingsBackground
                 hostingController.title = NSLocalizedString("Developer Options", comment: "")
                 self.prepare(for: UIStoryboardSegue(identifier: "diagnostics", source: self, destination: hostingController), sender: nil)
             case .experimentalFeatures:
                 let experimentalFeaturesView = ExperimentalFeaturesView()
-                let hostingController = UIHostingController(rootView: experimentalFeaturesView)
+                let hostingController = UIHostingController(rootView: experimentalFeaturesView.appLanguageEnvironment())
                 hostingController.view.backgroundColor = .settingsBackground
                 hostingController.title = NSLocalizedString("Experimental Features", comment: "")
                 self.prepare(for: UIStoryboardSegue(identifier: "diagnostics", source: self, destination: hostingController), sender: nil)

@@ -20,10 +20,20 @@ final class LaunchViewController: UIViewController {
     private var splashViewModel = SplashViewModel()
     private var destinationViewController: TabBarController?
     private var startTime: Date!
+    private var languageObserver: NSObjectProtocol?
 
     override func viewDidLoad() {
         super.viewDidLoad()
         debugLog("[LaunchViewController] viewDidLoad()")
+
+        // 설정에서 앱 언어를 바꾸면 재실행 없이 즉시 메인 화면을 새 언어로 다시 구성한다.
+        languageObserver = NotificationCenter.default.addObserver(
+            forName: LanguageManager.languageDidChangeNotification, object: nil, queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor [weak self] in
+                self?.reloadMainInterfaceForLanguageChange()
+            }
+        }
         destinationViewController = storyboard!.instantiateViewController(withIdentifier: "tabBarController") as? TabBarController
 
         #if !os(tvOS)
@@ -40,6 +50,73 @@ final class LaunchViewController: UIViewController {
 
         let splashHosting = UIHostingController(rootView: SplashView(viewModel: splashViewModel))
         embed(child: splashHosting)
+    }
+
+    /// 언어 변경 시 스토리보드 문자열(탭 이름, 설정 화면 정적 셀 등)을 새 언어로 다시 읽어야 하므로
+    /// TabBarController 는 새로 만들어야 한다(스토리보드 문자열은 로드 시점에만 번들에서 조회됨).
+    /// 다만 사용자 눈에는 아무 전환도 보이지 않도록 다음을 보장한다.
+    ///  - 새 화면을 옛 화면 위에 먼저 올린 뒤 옛 화면을 제거 (빈 프레임/깜빡임 없음)
+    ///  - 모든 교체를 비애니메이션(performWithoutAnimation + CATransaction)으로 수행
+    ///  - '사용자 지정 항목' 화면은 새로 만들지 않고 기존 UIHostingController 인스턴스를 그대로 재사용
+    ///    (SwiftUI 상태/스크롤 위치 유지, push 슬라이드 애니메이션 없음)
+    ///  - 선택된 탭, 설정 목록 스크롤 위치 복원
+    @MainActor
+    private func reloadMainInterfaceForLanguageChange() {
+        guard let oldTab = destinationViewController,
+              oldTab.parent === self,
+              let newTab = storyboard?.instantiateViewController(withIdentifier: "tabBarController") as? TabBarController
+        else { return }
+
+        func settingsNav(of tab: UITabBarController) -> UINavigationController? {
+            tab.viewControllers?
+                .compactMap { $0 as? UINavigationController }
+                .first { $0.viewControllers.first is SettingsViewController }
+        }
+
+        let selectedIndex = oldTab.selectedIndex
+        let oldSettingsNav = settingsNav(of: oldTab)
+        let oldSettingsVC = oldSettingsNav?.viewControllers.first as? SettingsViewController
+        let savedOffset = oldSettingsVC?.tableView.contentOffset
+
+        // 사용자 지정 항목 화면(SwiftUI)을 보고 있었다면 인스턴스를 그대로 가져온다.
+        var reusableHosting: UIViewController?
+        if let nav = oldSettingsNav,
+           let root = nav.viewControllers.first,
+           let top = nav.topViewController,
+           top is UIHostingController<UserCustomizationsView> {
+            reusableHosting = top
+            // 옛 네비게이션 스택에서 분리 (애니메이션 없이)
+            nav.setViewControllers([root], animated: false)
+        }
+
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        UIView.performWithoutAnimation {
+            newTab.selectedIndex = selectedIndex
+            destinationViewController = newTab
+            embed(child: newTab)          // 새 화면을 먼저 위에 올린다.
+            InterfaceLocalizer.shared.localizeTree(newTab)   // 스토리보드 문자열을 앱 언어로
+            self.view.layoutIfNeeded()
+
+            if let hosting = reusableHosting,
+               let nav = settingsNav(of: newTab),
+               let settingsVC = nav.viewControllers.first {
+                nav.setViewControllers([settingsVC, hosting], animated: false)
+            }
+
+            if let offset = savedOffset,
+               let settingsVC = settingsNav(of: newTab)?.viewControllers.first as? SettingsViewController {
+                settingsVC.loadViewIfNeeded()
+                settingsVC.tableView.layoutIfNeeded()
+                settingsVC.tableView.setContentOffset(offset, animated: false)
+            }
+
+            // 옛 화면 제거 (새 화면이 이미 덮고 있으므로 깜빡임 없음)
+            oldTab.willMove(toParent: nil)
+            oldTab.view.removeFromSuperview()
+            oldTab.removeFromParent()
+        }
+        CATransaction.commit()
     }
 
     @MainActor
@@ -96,7 +173,7 @@ final class LaunchViewController: UIViewController {
     @MainActor
     func displayError(_ msg: String) {
         debugLog("[SideStore] \(msg)")
-        let alert = UIAlertController(title: "Error launching SideStore", message: msg, preferredStyle: .alert)
+        let alert = UIAlertController(title: NSLocalizedString("Error launching SideStore", comment: ""), message: msg, preferredStyle: .alert)
         self.present(alert, animated: true)
     }
     

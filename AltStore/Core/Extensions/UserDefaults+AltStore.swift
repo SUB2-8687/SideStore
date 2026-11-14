@@ -20,6 +20,10 @@ public extension UserDefaults
         get { self.object(forKey: #function) as? Date }
         set { self.set(newValue, forKey: #function) }
     }
+    @objc var selectedAppLanguage: String? {
+        get { self.string(forKey: #function) }
+        set { self.set(newValue, forKey: #function) }
+    }
     @objc var hasCompletedOnboarding: Bool {
         get { self.bool(forKey: #function) }
         set { self.set(newValue, forKey: #function) }

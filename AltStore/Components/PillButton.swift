@@ -167,7 +167,7 @@ class PillButton: UIButton
     }()
     
     private let dateComponentsFormatter: DateComponentsFormatter = {
-        let dateComponentsFormatter = DateComponentsFormatter()
+        let dateComponentsFormatter = AppDateComponentsFormatter()
         dateComponentsFormatter.zeroFormattingBehavior = [.pad]
         dateComponentsFormatter.collapsesLargestUnit = false
         return dateComponentsFormatter
@@ -249,7 +249,7 @@ extension PillButton {
         } else if isExpired || installedApp.certificateStatus == .expired {
             self.setDisplayState(.expired)
         } else {
-            let formatter = DateComponentsFormatter()
+            let formatter = AppDateComponentsFormatter()
             formatter.unitsStyle = .full
             formatter.allowedUnits = [.day, .hour, .minute]
             formatter.maximumUnitCount = 1

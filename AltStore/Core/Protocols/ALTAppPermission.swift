@@ -89,8 +89,14 @@ public extension ALTAppPermission
         return knownPermission
     }
     
-    var localizedName: String? { self.knownPermission?.localizedName }
-    var localizedDescription: String? { self.knownPermission?.localizedDescription }
+    var localizedName: String? {
+        guard let name = self.knownPermission?.localizedName else { return nil }
+        return NSLocalizedString(name, comment: "")
+    }
+    var localizedDescription: String? {
+        guard let description = self.knownPermission?.localizedDescription else { return nil }
+        return NSLocalizedString(description, comment: "")
+    }
     var symbolName: String? { self.knownPermission?.symbolName }
 }
 
@@ -151,7 +157,7 @@ extension ALTEntitlement: ALTAppPermission
         }
         
         let synthesizedName = words.joined(separator: " ")
-        return synthesizedName
+        return NSLocalizedString(synthesizedName, comment: "")
     }
 }
 

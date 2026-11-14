@@ -36,6 +36,7 @@ struct AppExtensionView: View {
                 completion(selection)
             }
         }
+        .appLanguageEnvironment()
     }
 }
 
