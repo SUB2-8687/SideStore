@@ -15,6 +15,7 @@ private extension Color {
 }
 
 struct UserCustomizationsView: View {
+    @ObservedObject private var languageManager = LanguageManager.shared
     @State private var selectedBackend: GatewayBackend = selectedGatewayBackendCache
     @State private var isBackgroundServiceEnabled: Bool = UserDefaults.standard.isBackgroundServiceEnabled
     @State private var selectedBackgroundServiceMode: BackgroundServiceMode = UserDefaults.standard.backgroundServiceMode
@@ -105,6 +106,33 @@ struct UserCustomizationsView: View {
                         .padding(.horizontal, 16)
                         .padding(.vertical, 14)
                     }
+                    .background(Color.settingsRowBackground)
+                    .cornerRadius(14)
+                }
+
+                // App language selection is kept in the current settings screen so changes apply immediately.
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(localized("LANGUAGE"))
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(Color.white.opacity(0.6))
+                        .padding(.horizontal, 16)
+
+                    HStack {
+                        Text(localized("Language"))
+                            .font(.system(size: 17, weight: .bold))
+                            .foregroundColor(.white)
+                        Spacer()
+                        Picker("", selection: $languageManager.selectedLanguage) {
+                            ForEach(AppLanguage.allCases) { language in
+                                Text(language.displayName).tag(language)
+                            }
+                        }
+                        .pickerStyle(.menu)
+                        .tint(Color.white.opacity(0.7))
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .frame(minHeight: 50)
                     .background(Color.settingsRowBackground)
                     .cornerRadius(14)
                 }
@@ -440,7 +468,7 @@ struct UserCustomizationsView: View {
             .padding(.bottom, 32)
         }
         .background(Color(uiColor: .settingsBackground).ignoresSafeArea())
-        .navigationTitle("User Customizations")
+        .navigationTitle(localized("User Customizations"))
         #if !os(tvOS)
         .navigationBarTitleDisplayMode(.large)
         #endif
@@ -504,7 +532,7 @@ struct UserCustomizationsView: View {
             }
         }
         .alert(
-            editDialog?.title ?? "",
+            LocalizedStringKey(editDialog?.title ?? ""),
             isPresented: Binding<Bool>(
                 get: { editDialog != nil },
                 set: { if !$0 { editDialog = nil } }
@@ -524,7 +552,7 @@ struct UserCustomizationsView: View {
                 editDialog = nil
             }
         } message: {
-            Text(editDialog?.message ?? "")
+            Text(LocalizedStringKey(editDialog?.message ?? ""))
         }
         .task {
             isFreeAccount = (try? await AuthManager.shared.getAuthenticatedTeam())?.type == .free
@@ -534,12 +562,12 @@ struct UserCustomizationsView: View {
     private func toggleRow(title: String, subtitle: String? = nil, isOn: Binding<Bool>) -> some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
-                Text(title)
+                Text(LocalizedStringKey(title))
                     .font(.system(size: 17, weight: .bold))
                     .foregroundColor(.white)
                     .fixedSize(horizontal: false, vertical: true)
                 if let subtitle = subtitle {
-                    Text(subtitle)
+                    Text(LocalizedStringKey(subtitle))
                         .font(.system(size: 12, weight: .regular))
                         .foregroundColor(Color.white.opacity(0.6))
                         .fixedSize(horizontal: false, vertical: true)
@@ -566,12 +594,12 @@ struct UserCustomizationsView: View {
         SwiftUI.Button(action: onTap) {
             VStack(alignment: .leading, spacing: 6) {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(title)
+                    Text(LocalizedStringKey(title))
                         .font(.system(size: 17, weight: .bold))
                         .foregroundColor(.white)
                         .fixedSize(horizontal: false, vertical: true)
                     if let subtitle = subtitle {
-                        Text(subtitle)
+                        Text(LocalizedStringKey(subtitle))
                             .font(.system(size: 12, weight: .regular))
                             .foregroundColor(Color.white.opacity(0.6))
                             .fixedSize(horizontal: false, vertical: true)

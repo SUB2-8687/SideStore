@@ -17,6 +17,7 @@ private extension Color {
 
 struct PairingFileManagementView: View {
     @StateObject private var viewModel = PairingFileManagementViewModel()
+    @ObservedObject private var languageManager = LanguageManager.shared
 
     var body: some View {
         ScrollView {
@@ -31,7 +32,7 @@ struct PairingFileManagementView: View {
             .padding(.bottom, 32)
         }
         .background(Color(uiColor: .settingsBackground).ignoresSafeArea())
-        .navigationTitle("Pairing File Management")
+        .navigationTitle(localizedString("Pairing File Management"))
         #if !os(tvOS)
         .navigationBarTitleDisplayMode(.inline)
         #endif
@@ -42,7 +43,7 @@ struct PairingFileManagementView: View {
                 } label: {
                     Image(systemName: viewModel.isGlobalHideActive ? "eye.slash" : "eye")
                 }
-                .accessibilityLabel("Toggle Sensitive Information")
+                .accessibilityLabel(localizedString("Toggle Sensitive Information"))
             }
         }
         .onAppear {
@@ -60,48 +61,48 @@ struct PairingFileManagementView: View {
             switch alert {
             case .deleteConfirmation(let proto):
                 return Alert(
-                    title: Text("Delete Pairing File?"),
+                    title: Text(localizedString("Delete Pairing File?")),
                     message: Text(LocalizedStringKey("Are you sure you want to delete this pairing file? This will remove the pairing credentials for **\(proto.rawValue)**.")),
-                    primaryButton: .destructive(Text("Delete")) {
+                    primaryButton: .destructive(Text(localizedString("Delete"))) {
                         viewModel.deletePairingFile(for: proto)
                     },
                     secondaryButton: .cancel()
                 )
             case .resetConfirmation:
                 return Alert(
-                    title: Text("Reset Pairing Files?"),
+                    title: Text(localizedString("Reset Pairing Files?")),
                     message: Text(LocalizedStringKey("This will delete all stored pairing files (both **Lockdown** and **Remote Pairing**). You will need to re-pair or re-import a pairing file and restart SideStore.")),
-                    primaryButton: .destructive(Text("Delete and Reset")) {
+                    primaryButton: .destructive(Text(localizedString("Delete and Reset"))) {
                         viewModel.resetAllPairingFiles()
                     },
                     secondaryButton: .cancel()
                 )
             case .resetCompleted:
                 return Alert(
-                    title: Text("Pairing Files Reset"),
-                    message: Text("All pairing files have been reset. Please restart SideStore."),
-                    dismissButton: .default(Text("OK"))
+                    title: Text(localizedString("Pairing Files Reset")),
+                    message: Text(localizedString("All pairing files have been reset. Please restart SideStore.")),
+                    dismissButton: .default(Text(localizedString("OK")))
                 )
             case .importError(let msg):
                 return Alert(
-                    title: Text("Import Error"),
+                    title: Text(localizedString("Import Error")),
                     message: Text(LocalizedStringKey(msg)),
-                    dismissButton: .default(Text("OK"))
+                    dismissButton: .default(Text(localizedString("OK")))
                 )
             }
         }
+        .appLanguageEnvironment(rebuildsOnChange: false)
     }
-
     private var activeProtocolSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("ACTIVE PROTOCOL")
+            Text(localizedString("ACTIVE PROTOCOL"))
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundColor(Color.white.opacity(0.6))
                 .padding(.horizontal, 4)
 
             VStack(spacing: 0) {
                 HStack {
-                    Text("Active Protocol")
+                    Text(localizedString("Active Protocol"))
                         .font(.system(size: 16))
                         .foregroundColor(.white)
 
@@ -129,7 +130,7 @@ struct PairingFileManagementView: View {
                     .padding(.horizontal, 16)
 
                 HStack {
-                    Text("Preferred Protocol")
+                    Text(localizedString("Preferred Protocol"))
                         .font(.system(size: 16))
                         .foregroundColor(.white)
 
@@ -141,7 +142,7 @@ struct PairingFileManagementView: View {
                             .frame(width: 7, height: 7)
                             .shadow(color: (viewModel.preferredProtocol != nil ? ledColor(for: viewModel.preferredProtocol!) : Color.gray).opacity(0.8), radius: 3)
 
-                        Text(viewModel.preferredProtocol != nil ? activeProtocolTagText(for: viewModel.preferredProtocol!) : "None")
+                        Text(viewModel.preferredProtocol != nil ? activeProtocolTagText(for: viewModel.preferredProtocol!) : NSLocalizedString("None", comment: ""))
                             .font(.system(size: 13, weight: .semibold, design: .monospaced))
                             .foregroundColor(.white)
                     }
@@ -156,7 +157,7 @@ struct PairingFileManagementView: View {
                         SwiftUI.Button(role: .destructive) {
                             viewModel.clearPreferred()
                         } label: {
-                            Label("Clear Preferred Protocol", systemImage: "star.slash")
+                            Label(localizedString("Clear Preferred Protocol"), systemImage: "star.slash")
                         }
                     }
                 }
@@ -168,7 +169,7 @@ struct PairingFileManagementView: View {
 
     private var pairingFilesSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("PAIRING FILES")
+            Text(localizedString("PAIRING FILES"))
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundColor(Color.white.opacity(0.6))
                 .padding(.horizontal, 4)
@@ -209,7 +210,7 @@ struct PairingFileManagementView: View {
                                     await viewModel.activate(proto: proto)
                                 }
                             } label: {
-                                Label("Activate", systemImage: "bolt.fill")
+                                Label(localizedString("Activate"), systemImage: "bolt.fill")
                             }
                         }
 
@@ -217,19 +218,19 @@ struct PairingFileManagementView: View {
                             SwiftUI.Button {
                                 viewModel.setPreferred(proto: proto)
                             } label: {
-                                Label("Set as Preferred", systemImage: "star.fill")
+                                Label(localizedString("Set as Preferred"), systemImage: "star.fill")
                             }
                         } else {
                             SwiftUI.Button {
                                 viewModel.clearPreferred()
                             } label: {
-                                Label("Remove as Preferred", systemImage: "star.slash")
+                                Label(localizedString("Remove as Preferred"), systemImage: "star.slash")
                             }
                         }
 
                         if proto == viewModel.activeProtocol {
                             SwiftUI.Button { } label: {
-                                Label("Currently Active", systemImage: "checkmark.circle.fill")
+                                Label(localizedString("Currently Active"), systemImage: "checkmark.circle.fill")
                             }
                             .disabled(true)
                         }
@@ -238,13 +239,13 @@ struct PairingFileManagementView: View {
                     SwiftUI.Button {
                         viewModel.promptImport(for: proto)
                     } label: {
-                        Label("Import / Replace File", systemImage: "square.and.arrow.down")
+                        Label(localizedString("Import / Replace File"), systemImage: "square.and.arrow.down")
                     }
 
                     SwiftUI.Button(role: .destructive) {
                         viewModel.confirmDelete(for: proto)
                     } label: {
-                        Label("Delete Pairing File", systemImage: "trash")
+                        Label(localizedString("Delete Pairing File"), systemImage: "trash")
                     }
                 }
 
@@ -283,7 +284,7 @@ struct PairingFileManagementView: View {
                         }
                     }
 
-                    infoRow(label: "File Size", value: ByteCountFormatter.string(fromByteCount: fileSize, countStyle: .file))
+                    infoRow(label: "File Size", value: AppFormat.bytes(fileSize))
                     if let created = creationDate {
                         divider
                         infoRow(label: "Date Created", value: formatDate(created))
@@ -308,7 +309,7 @@ struct PairingFileManagementView: View {
                     SwiftUI.Button {
                         viewModel.promptImport(for: proto)
                     } label: {
-                        Label("Import Pairing File", systemImage: "square.and.arrow.down")
+                        Label(localizedString("Import Pairing File"), systemImage: "square.and.arrow.down")
                     }
                 }
             }
@@ -323,14 +324,14 @@ struct PairingFileManagementView: View {
                 .font(.system(size: 22))
                 .foregroundColor(proto == .rppairing ? .cyan : .green)
 
-            Text(proto == .rppairing ? "Remote Pairing File" : "Lockdown Pairing File")
+            Text(proto == .rppairing ? NSLocalizedString("Remote Pairing File", comment: "") : NSLocalizedString("Lockdown Pairing File", comment: ""))
                 .font(.system(size: 16, weight: .bold))
                 .foregroundColor(.white)
 
             Spacer()
 
             if isValid {
-                Text("Configured")
+                Text(localizedString("Configured"))
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundColor(.green)
                     .padding(.horizontal, 8)
@@ -338,7 +339,7 @@ struct PairingFileManagementView: View {
                     .background(Color.green.opacity(0.15))
                     .cornerRadius(6)
             } else {
-                Text("Invalid")
+                Text(localizedString("Invalid"))
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundColor(.orange)
                     .padding(.horizontal, 8)
@@ -361,13 +362,13 @@ struct PairingFileManagementView: View {
                 .font(.system(size: 22))
                 .foregroundColor(Color.white.opacity(0.3))
 
-            Text(proto == .rppairing ? "Remote Pairing File" : "Lockdown Pairing File")
+            Text(proto == .rppairing ? NSLocalizedString("Remote Pairing File", comment: "") : NSLocalizedString("Lockdown Pairing File", comment: ""))
                 .font(.system(size: 16, weight: .bold))
                 .foregroundColor(Color.white.opacity(0.8))
 
             Spacer()
 
-            Text("Missing")
+            Text(localizedString("Missing"))
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundColor(.red)
                 .padding(.horizontal, 8)
@@ -391,7 +392,7 @@ struct PairingFileManagementView: View {
             viewModel.toggleReveal(for: fieldKey)
         } label: {
             HStack {
-                Text(label)
+                Text(NSLocalizedString(label, comment: ""))
                     .font(.system(size: 14))
                     .foregroundColor(Color.white.opacity(0.6))
                 Spacer()
@@ -407,11 +408,11 @@ struct PairingFileManagementView: View {
 
     private func infoRow(label: String, value: String, isMonospaced: Bool = false) -> some View {
         HStack {
-            Text(label)
+            Text(LocalizedStringKey(label))
                 .font(.system(size: 14))
                 .foregroundColor(Color.white.opacity(0.6))
             Spacer()
-            Text(value)
+            Text(NSLocalizedString(value, comment: ""))
                 .font(.system(size: 13, weight: .medium, design: isMonospaced ? .monospaced : .default))
                 .foregroundColor(Color.white.opacity(0.85))
                 .lineLimit(1)
@@ -424,7 +425,7 @@ struct PairingFileManagementView: View {
     @ViewBuilder
     private func protocolStatusRow(for proto: PairingProtocol) -> some View {
         HStack {
-            Text("Status")
+            Text(localizedString("Status"))
                 .font(.system(size: 14))
                 .foregroundColor(Color.white.opacity(0.6))
 
@@ -438,7 +439,7 @@ struct PairingFileManagementView: View {
                             .frame(width: 7, height: 7)
                             .shadow(color: ledColor(for: proto).opacity(0.8), radius: 3)
 
-                        Text("Active")
+                        Text(localizedString("Active"))
                             .font(.system(size: 13, weight: .semibold, design: .monospaced))
                             .foregroundColor(.white)
                     }
@@ -454,7 +455,7 @@ struct PairingFileManagementView: View {
                             .frame(width: 7, height: 7)
                             .shadow(color: Color.yellow.opacity(0.8), radius: 3)
 
-                        Text("Preferred")
+                        Text(localizedString("Preferred"))
                             .font(.system(size: 13, weight: .semibold, design: .monospaced))
                             .foregroundColor(.white)
                     }
@@ -470,7 +471,7 @@ struct PairingFileManagementView: View {
 
     private var pairingMethodsSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("PAIRING METHODS")
+            Text(localizedString("PAIRING METHODS"))
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundColor(Color.white.opacity(0.6))
                 .padding(.horizontal, 4)
@@ -481,7 +482,7 @@ struct PairingFileManagementView: View {
                         Image(systemName: "antenna.radiowaves.left.and.right")
                             .font(.system(size: 18, weight: .semibold))
                             .foregroundColor(.white)
-                        Text("Wireless Pairing")
+                        Text(localizedString("Wireless Pairing"))
                             .font(.system(size: 17, weight: .bold))
                             .foregroundColor(.white)
                         Spacer()
@@ -500,7 +501,7 @@ struct PairingFileManagementView: View {
 
     private var managementSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("MANAGEMENT")
+            Text(localizedString("MANAGEMENT"))
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundColor(Color.white.opacity(0.6))
                 .padding(.horizontal, 4)
@@ -513,7 +514,7 @@ struct PairingFileManagementView: View {
                         Image(systemName: "arrow.counterclockwise.circle")
                             .font(.system(size: 18, weight: .semibold))
                             .foregroundColor(.red)
-                        Text("Reset Pairing Files")
+                        Text(localizedString("Reset Pairing Files"))
                             .font(.system(size: 17, weight: .bold))
                             .foregroundColor(.red)
                         Spacer()
@@ -525,7 +526,7 @@ struct PairingFileManagementView: View {
             .background(Color.settingsRowBackground)
             .cornerRadius(14)
 
-            Text("Resetting pairing files removes stored Lockdown and Remote Pairing credentials. You will need to re-pair or re-import a pairing file and restart SideStore.")
+            Text(localizedString("Resetting pairing files removes stored Lockdown and Remote Pairing credentials. You will need to re-pair or re-import a pairing file and restart SideStore."))
                 .font(.system(size: 12))
                 .foregroundColor(Color.white.opacity(0.5))
                 .padding(.horizontal, 4)
@@ -563,7 +564,7 @@ struct PairingFileManagementView: View {
     }
 
     private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
+        let formatter = AppDateFormatter()
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
         return formatter.string(from: date)

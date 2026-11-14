@@ -25,11 +25,11 @@ public final class StorageExplorerClipboard: ObservableObject {
     
     public var pasteLabelText: String {
         if copiedURLs.count == 1, let first = copiedURLs.first {
-            return "Paste “\(first.lastPathComponent)”"
+            return String(format: NSLocalizedString("Paste “%@”", comment: ""), first.lastPathComponent)
         } else if copiedURLs.count > 1 {
-            return "Paste \(copiedURLs.count) Items"
+            return String(format: NSLocalizedString("Paste %d Items", comment: ""), copiedURLs.count)
         }
-        return "Paste"
+        return NSLocalizedString("Paste", comment: "")
     }
     
     public func setCopied(urls: [URL]) {
@@ -72,11 +72,11 @@ public struct StorageExplorerItem: Identifiable, Hashable {
     public let modificationDate: Date
     
     public var formattedSize: String {
-        ByteCountFormatter.string(fromByteCount: size, countStyle: .file)
+        AppFormat.bytes(size)
     }
     
     public var formattedDate: String {
-        let formatter = DateFormatter()
+        let formatter = AppDateFormatter()
         formatter.dateStyle = .short
         formatter.timeStyle = .short
         return formatter.string(from: modificationDate)
@@ -163,14 +163,14 @@ public final class StorageExplorerViewModel: ObservableObject {
             #if !os(tvOS)
             let values = try FileManager.default.temporaryDirectory.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey, .volumeAvailableCapacityKey])
             if let free = values.volumeAvailableCapacityForImportantUsage {
-                return ByteCountFormatter.string(fromByteCount: free, countStyle: .file)
+                return AppFormat.bytes(free)
             } else if let free = values.volumeAvailableCapacity {
-                return ByteCountFormatter.string(fromByteCount: Int64(free), countStyle: .file)
+                return AppFormat.bytes(Int64(free))
             }
             #else
             let values = try FileManager.default.temporaryDirectory.resourceValues(forKeys: [.volumeAvailableCapacityKey])
             if let free = values.volumeAvailableCapacity {
-                return ByteCountFormatter.string(fromByteCount: Int64(free), countStyle: .file)
+                return AppFormat.bytes(Int64(free))
             }
             #endif
         } catch {}

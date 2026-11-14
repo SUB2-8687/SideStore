@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 import Network
 import Minimuxer
 import MinimuxerCommon
@@ -204,16 +205,126 @@ public func isMinimuxerReady() async -> Result<Bool, MinimuxerError> {
     return await minimuxer.core.isReady(withNetworkCheck: !isEnabled)
 }
 
+/// 한 번만 결과를 확정하기 위한 잠금 (타임아웃과 실제 작업 중 먼저 끝난 쪽만 채택)
+private final class OnceGate: @unchecked Sendable {
+    private let lock = NSLock()
+    private var fired = false
+    func tryFire() -> Bool {
+        lock.lock(); defer { lock.unlock() }
+        if fired { return false }
+        fired = true
+        return true
+    }
+}
+
+/// 지정한 시간 안에 끝나지 않으면 nil 을 돌려준다.
+/// 취소에 반응하지 않고 멈춰 있는 작업(VPN 터널 대기 등)이 있어도 호출한 쪽은 더 이상 기다리지 않는다.
+/// (구조적 동시성의 TaskGroup 은 멈춘 자식 작업까지 기다리므로 일부러 쓰지 않는다.) needs proper testing
+func withTimeoutOrNil<T>(seconds: TimeInterval, _ operation: @escaping @Sendable () async -> T) async -> T? {
+    await withCheckedContinuation { (continuation: CheckedContinuation<T?, Never>) in
+        let gate = OnceGate()
+        Task {
+            let value = await operation()
+            if gate.tryFire() { continuation.resume(returning: value) }
+        }
+        Task {
+            try? await Task.sleep(nanoseconds: UInt64(max(seconds, 0) * 1_000_000_000))
+            if gate.tryFire() { continuation.resume(returning: nil) }
+        }
+    }
+}
+
+/// VPN/minimuxer 가 멈춰 있을 때 minimuxer 를 정지한 뒤 저장된 페어링 파일로 다시 시작해 터널을 새로 잡게 한다.
+/// 각 단계에는 제한 시간을 두어 이 복구 자체가 멈추지 않도록 한다. needs proper testing
+private func restartMinimuxerForRecovery() async {
+    #if !targetEnvironment(simulator)
+    guard let pairingFile = PairingFileManager.shared.fetchPairingFile() else {
+        debugLog("[SideStore] Minimuxer recovery skipped: pairing file is not readable (device may be locked)")
+        return
+    }
+    debugLog("[SideStore] Minimuxer recovery: restarting minimuxer...")
+    _ = await withTimeoutOrNil(seconds: 10) { (try? await minimuxerStop()) != nil }
+    let restarted = await withTimeoutOrNil(seconds: 25) {
+        (try? await AppBootManager.shared.startMinimuxer(pairingFile: pairingFile)) != nil
+    }
+    debugLog("[SideStore] Minimuxer recovery finished (restarted=\(String(describing: restarted)))")
+    #endif
+}
+
 public func ensureMinimuxerReady() async throws {
     if CellularRefreshManager.shared.isEnabled && UserDefaults.standard.enableEMPforWireguard {
         throw OperationError.invalidVPN(
-            reason: "WireGuard VPN is not supported with Cellular Refresh because iOS pauses the WireGuard tunnel when cellular data is toggled off."
+            reason: NSLocalizedString("WireGuard VPN is not supported with Cellular Refresh because iOS pauses the WireGuard tunnel when cellular data is toggled off.", comment: "")
         )
     }
     if !CellularRefreshManager.shared.isEnabled {
-        try await withRemotePairingRetry {
-            if case .failure(let error) = await isMinimuxerReady() {
-                throw error.asOperationError
+        // 저전력 모드이거나 앱이 화면에 보이지 않는 상태(단축어 자동화, 잠금 화면)에서는 백그라운드 실행이 느려져서
+        // VPN 터널과 minimuxer 가 준비되기 전에 새로고침이 시작되어 실패하거나, 준비 확인 자체가 끝나지 않고 멈춰 있는 경우가 있다.
+        // 일시적인 연결 오류는 잠시 기다리며 다시 확인하고, 응답이 없으면 제한 시간 후 minimuxer 를 다시 시작해 본다.
+        let isLowPowerMode = ProcessInfo.processInfo.isLowPowerModeEnabled
+        let isBackground = await MainActor.run { UIApplication.shared.applicationState != .active }
+        let isSlowContext = isLowPowerMode || isBackground
+        let startupGrace: TimeInterval = isSlowContext ? 45 : 10    // minimuxer 시작 대기
+        let connectionGrace: TimeInterval = isSlowContext ? 75 : 0  // VPN/네트워크 연결 대기 (느린 환경에서만)
+        let checkTimeout: TimeInterval = 10                          // 준비 확인 1회당 최대 대기 시간
+        let recoveryDelay: TimeInterval = 15                         // 이 시간 이상 준비되지 않으면 minimuxer 재시작 시도
+        let maxRecoveries = 2
+        let startedAt = Date()
+        var recoveries = 0
+        var lastRecoveryAt: Date? = nil
+
+        while true {
+            do {
+                // 준비 확인이 끝나지 않고 멈춰 있어도(VPN 대기 등) checkTimeout 뒤에는 오류로 처리하고 다시 시도한다.
+                let checked: Result<Bool, OperationError>? = await withTimeoutOrNil(seconds: checkTimeout) {
+                    do {
+                        try await withRemotePairingRetry {
+                            if case .failure(let error) = await isMinimuxerReady() {
+                                throw error.asOperationError
+                            }
+                        }
+                        return .success(true)
+                    } catch let error as OperationError {
+                        return .failure(error)
+                    } catch {
+                        return .failure(.invalidParameters("\(error)"))
+                    }
+                }
+                switch checked {
+                case .some(.success):
+                    return
+                case .some(.failure(let error)):
+                    throw error
+                case .none:
+                    throw OperationError.noVPN(reason: NSLocalizedString("VPN did not respond in time.", comment: ""))
+                }
+            } catch let error as OperationError {
+                let elapsed = Date().timeIntervalSince(startedAt)
+                let grace: TimeInterval
+                var isConnectionIssue = false
+                switch error {
+                case .minimuxerNotStarted:
+                    grace = startupGrace
+                    isConnectionIssue = true
+                case .noVPN, .noConnection, .notReachable:
+                    grace = connectionGrace
+                    isConnectionIssue = true
+                default:
+                    grace = 0
+                }
+                guard elapsed < grace, !Task.isCancelled else { throw error }
+
+                // 한동안 준비되지 않으면 minimuxer 를 다시 시작해 VPN 터널을 새로 잡게 한다 (최대 maxRecoveries 회)
+                let sinceLastRecovery = lastRecoveryAt.map { Date().timeIntervalSince($0) } ?? elapsed
+                if isConnectionIssue, recoveries < maxRecoveries, elapsed >= recoveryDelay, sinceLastRecovery >= recoveryDelay {
+                    recoveries += 1
+                    lastRecoveryAt = Date()
+                    await restartMinimuxerForRecovery()
+                    continue
+                }
+
+                debugLog("[SideStore] Minimuxer not ready yet (\(error)); retrying... elapsed=\(String(format: "%.1f", elapsed))s, lowPowerMode=\(isLowPowerMode), background=\(isBackground)")
+                try await Task.sleep(nanoseconds: 1_000_000_000)
             }
         }
     }

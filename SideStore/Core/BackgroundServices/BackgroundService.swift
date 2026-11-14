@@ -27,18 +27,18 @@ public enum BackgroundServiceMode: String, CaseIterable, Sendable {
     public var displayName: String {
         switch self {
         case .audio:
-            return "Audio"
+            return NSLocalizedString("Audio", comment: "")
         case .location:
-            return "Location"
+            return NSLocalizedString("Location", comment: "")
         }
     }
 
     public var subtitle: String {
         switch self {
         case .audio:
-            return "Silent keepalive background audio loop"
+            return NSLocalizedString("Silent keepalive background audio loop", comment: "")
         case .location:
-            return "Low-power keepalive background location"
+            return NSLocalizedString("Low-power keepalive background location", comment: "")
         }
     }
 }

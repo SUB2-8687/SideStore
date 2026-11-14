@@ -56,24 +56,24 @@ struct CreateManualProfileView: View {
         NavigationView {
             Form {
                 Section(footer: Text(isManualConfiguration
-                    ? "Manually select which signing certificates and test devices are authorized."
-                    : "Apple automatically provisions active certificates and devices for this App ID and platform.")) {
+                    ? localizedString("Manually select which signing certificates and test devices are authorized.")
+                    : localizedString("Apple automatically provisions active certificates and devices for this App ID and platform."))) {
 
                     if viewModel.appIDs.isEmpty {
                         if viewModel.isLoading {
                             HStack {
-                                Text("App ID")
+                                Text(localizedString("App ID"))
                                 Spacer()
                                 ProgressView()
                             }
                         } else {
-                            Text("No App IDs found. Create an App ID first.")
+                            Text(localizedString("No App IDs found. Create an App ID first."))
                                 .foregroundColor(.secondary)
                         }
                     } else {
                         Picker("App ID", selection: $selectedAppIDIdentifier) {
                             ForEach(viewModel.appIDs, id: \.identifier) { appID in
-                                Text(appID.name.isEmpty ? appID.bundleIdentifier : "\(appID.name) (\(appID.bundleIdentifier))")
+                                Text(appID.name.isEmpty ? appID.bundleIdentifier : String(format: localizedString("%@ (%@)"), appID.name, appID.bundleIdentifier))
                                     .tag(appID.identifier)
                             }
                         }
@@ -100,17 +100,17 @@ struct CreateManualProfileView: View {
                         }
                     }
 
-                    TextField("Profile Name", text: $profileName)
+                    TextField(localizedString("Profile Name"), text: $profileName)
 
                     Toggle("Manual Configuration", isOn: $isManualConfiguration.animation())
                 }
 
                 if isManualConfiguration {
                     Section(header: HStack {
-                        Text("Certificates (\(selectedCertificateIDs.count)/\(viewModel.certificates.count))")
+                        Text(String(format: localizedString("Certificates (%d/%d)"), selectedCertificateIDs.count, viewModel.certificates.count))
                         Spacer()
                         if !viewModel.certificates.isEmpty {
-                            SwiftUI.Button(selectedCertificateIDs.count == viewModel.certificates.count ? "Deselect All" : "Select All") {
+                            SwiftUI.Button(selectedCertificateIDs.count == viewModel.certificates.count ? localizedString("Deselect All") : localizedString("Select All")) {
                                 if selectedCertificateIDs.count == viewModel.certificates.count {
                                     selectedCertificateIDs.removeAll()
                                 } else {
@@ -119,7 +119,7 @@ struct CreateManualProfileView: View {
                             }
                             .font(.caption)
                         }
-                    }, footer: Text("Select which certificates are permitted to sign applications with this profile.")) {
+                    }, footer: Text(localizedString("Select which certificates are permitted to sign applications with this profile."))) {
                         if viewModel.certificates.isEmpty {
                             if viewModel.isLoading {
                                 HStack {
@@ -128,7 +128,7 @@ struct CreateManualProfileView: View {
                                     Spacer()
                                 }
                             } else {
-                                Text("No certificates found on this team.")
+                                Text(localizedString("No certificates found on this team."))
                                     .foregroundColor(.secondary)
                                     .font(.subheadline)
                             }
@@ -147,12 +147,12 @@ struct CreateManualProfileView: View {
                                             Text(cert.commonName ?? cert.name)
                                                 .font(.subheadline)
                                                 .foregroundColor(.primary)
-                                            Text("Serial: \(cert.serialNumber)")
+                                            Text(String(format: localizedString("Serial: %@"), cert.serialNumber))
                                                 .font(.caption2)
                                                 .foregroundColor(.secondary)
                                             let hasKey = ProfileManager.shared.hasPrivateKey(for: cert)
                                             HStack(spacing: 4) {
-                                                Text("Type: \(hasKey ? "public + private" : "public only")")
+                                                Text(String(format: localizedString("Type: %@"), NSLocalizedString(hasKey ? "public + private" : "public only", comment: "")))
                                                     .font(.caption2)
                                                     .foregroundColor(hasKey ? .green : .secondary)
                                                 if hasKey {
@@ -176,10 +176,10 @@ struct CreateManualProfileView: View {
 
                     if selectedProfileType.acceptedDeviceTypes != .none {
                         Section(header: HStack {
-                            Text("Devices (\(selectedDeviceIDs.count)/\(filteredDevices.count))")
+                            Text(String(format: localizedString("Devices (%d/%d)"), selectedDeviceIDs.count, filteredDevices.count))
                             Spacer()
                             if !filteredDevices.isEmpty {
-                                SwiftUI.Button(selectedDeviceIDs.count == filteredDevices.count ? "Deselect All" : "Select All") {
+                                SwiftUI.Button(selectedDeviceIDs.count == filteredDevices.count ? localizedString("Deselect All") : localizedString("Select All")) {
                                     if selectedDeviceIDs.count == filteredDevices.count {
                                         selectedDeviceIDs.removeAll()
                                     } else {
@@ -188,7 +188,7 @@ struct CreateManualProfileView: View {
                                 }
                                 .font(.caption)
                             }
-                        }, footer: Text("Select registered test devices that can install apps signed with this profile.")) {
+                        }, footer: Text(localizedString("Select registered test devices that can install apps signed with this profile."))) {
                             if filteredDevices.isEmpty {
                                 if viewModel.isLoading {
                                     HStack {
@@ -197,7 +197,7 @@ struct CreateManualProfileView: View {
                                         Spacer()
                                     }
                                 } else {
-                                    Text("No registered \(selectedProfileType.displayName) devices found on this team.")
+                                    Text(String(format: localizedString("No registered %@ devices found on this team."), selectedProfileType.displayName))
                                         .foregroundColor(.secondary)
                                         .font(.subheadline)
                                 }
@@ -233,9 +233,10 @@ struct CreateManualProfileView: View {
                     }
                 }
             }
-            .navigationTitle("New Profile")
+            .navigationTitle(localizedString("New Profile"))
+            .appLanguageEnvironment()
             .navigationBarItems(
-                leading: SwiftUI.Button("Cancel") {
+                leading: SwiftUI.Button(localizedString("Cancel")) {
                     presentationMode.wrappedValue.dismiss()
                 },
                 trailing: SwiftUI.Button {
@@ -262,7 +263,7 @@ struct CreateManualProfileView: View {
                     if viewModel.isActionLoading {
                         ProgressView()
                     } else {
-                        Text("Generate")
+                        Text(localizedString("Generate"))
                             .bold()
                     }
                 }

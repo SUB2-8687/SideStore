@@ -10,6 +10,7 @@ import SwiftUI
 
 struct WirelessPairView: View {
     @StateObject private var viewModel = WirelessPairViewModel()
+    @ObservedObject private var languageManager = LanguageManager.shared
     
     private let spring = Animation.spring(response: 0.35, dampingFraction: 0.68)
     private let pulse = Animation.interactiveSpring(response: 1.5, dampingFraction: 0.55)
@@ -205,6 +206,10 @@ struct WirelessPairView: View {
                 ActivityViewController(activityItems: [fileURL])
             }
         }
+        .onChange(of: languageManager.effectiveLanguageCode) { _ in
+            viewModel.refreshLocalizedStatusText()
+        }
+        .appLanguageEnvironment(rebuildsOnChange: false)
     }
     
     private func togglePairing() {
@@ -303,7 +308,7 @@ struct ConnectionDetailsCard: View {
                     
                     VStack(alignment: .leading, spacing: 0) {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(label)
+                            Text(NSLocalizedString(label, comment: ""))
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                             Text(value)
@@ -343,7 +348,7 @@ struct ConnectionDetailsCard: View {
                             UIPasteboard.general.string = value
                             #endif
                         } label: {
-                            Label("Copy \(label)", systemImage: "doc.on.doc")
+                            Label(String(format: NSLocalizedString("Copy %@", comment: ""), label), systemImage: "doc.on.doc")
                         }
                     }
                 }

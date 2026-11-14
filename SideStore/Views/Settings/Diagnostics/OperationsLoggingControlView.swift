@@ -101,6 +101,7 @@ struct OperationsLoggingControlView: View {
         }
         .background(Color(uiColor: .settingsBackground).ignoresSafeArea())
         .navigationTitle("Operations Logging")
+        .appLanguageEnvironment()
         #if !os(tvOS)
         .navigationBarTitleDisplayMode(.large)
         #endif
@@ -108,7 +109,7 @@ struct OperationsLoggingControlView: View {
 
     private func stepToggle(_ title: String, step: some OperationStep) -> some View {
         HStack {
-            Text(title)
+            Text(localizedString(title))
                 .font(.system(size: 17, weight: .bold))
                 .foregroundColor(.white)
                 .fixedSize(horizontal: false, vertical: true)

@@ -17,6 +17,7 @@ private extension Color {
 
 struct PairingFileDetailView: View {
     let mode: PairingProtocol
+    @ObservedObject private var languageManager = LanguageManager.shared
     
     @State private var rawContent: String
     @State private var isEditing = false
@@ -68,11 +69,11 @@ struct PairingFileDetailView: View {
     private var titleText: String {
         switch mode {
         case .rppairing:
-            return "Remote Pairing File"
+            return localizedString("Remote Pairing File")
         case .lockdown:
-            return "Lockdown Pairing File"
+            return localizedString("Lockdown Pairing File")
         case .unknown:
-            return "Pairing File"
+            return localizedString("Pairing File")
         }
     }
 
@@ -94,11 +95,11 @@ struct PairingFileDetailView: View {
         .toolbar {
             ToolbarItemGroup(placement: .navigationBarTrailing) {
                 if isEditing {
-                    SwiftUI.Button("Cancel") {
+                    SwiftUI.Button(localizedString("Cancel")) {
                         editedContent = rawContent
                         isEditing = false
                     }
-                    SwiftUI.Button("Save") {
+                    SwiftUI.Button(localizedString("Save")) {
                         saveEditedContent()
                     }
                     .font(.system(size: 17, weight: .bold))
@@ -113,9 +114,9 @@ struct PairingFileDetailView: View {
                         } label: {
                             Image(systemName: hasCopiedContent ? "checkmark" : "doc.on.doc")
                         }
-                        .accessibilityLabel("Copy XML")
+                        .accessibilityLabel(localizedString("Copy XML"))
 
-                        SwiftUI.Button("Edit") {
+                        SwiftUI.Button(localizedString("Edit")) {
                             requestEnterEditMode()
                         }
                     }
@@ -123,15 +124,16 @@ struct PairingFileDetailView: View {
             }
         }
         .alert("Invalid Property List", isPresented: $showingInvalidPlistAlert) {
-            SwiftUI.Button("OK", role: .cancel) { }
+            SwiftUI.Button(localizedString("OK"), role: .cancel) { }
         } message: {
             Text(invalidPlistMessage)
         }
+        .appLanguageEnvironment(rebuildsOnChange: false)
     }
 
     private var fileInfoSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("FILE INFORMATION")
+            Text(localizedString("FILE INFORMATION"))
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundColor(Color.white.opacity(0.6))
                 .padding(.horizontal, 4)
@@ -144,7 +146,7 @@ struct PairingFileDetailView: View {
                 metadataRow(label: "Status", value: isInstalled ? "Installed" : "Not Found", valueColor: isInstalled ? .green : .red)
                 if isInstalled {
                     divider
-                    metadataRow(label: "File Size", value: ByteCountFormatter.string(fromByteCount: fileSize, countStyle: .file))
+                    metadataRow(label: "File Size", value: AppFormat.bytes(fileSize))
                     if let created = creationDate {
                         divider
                         metadataRow(label: "Date Created", value: formatDate(created))
@@ -163,13 +165,13 @@ struct PairingFileDetailView: View {
     private var xmlContentSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text(isEditing ? "EDIT RAW XML" : "RAW XML CONTENT")
+                Text(isEditing ? localizedString("EDIT RAW XML") : localizedString("RAW XML CONTENT"))
                     .font(.system(size: 13, weight: .semibold))
                     .foregroundColor(Color.white.opacity(0.6))
                 Spacer()
                 let displayed = isEditing ? editedContent : rawContent
                 if !displayed.isEmpty {
-                    Text("\(displayed.count) bytes")
+                    Text(String(format: localizedString("%d bytes"), displayed.count))
                         .font(.system(size: 12))
                         .foregroundColor(Color.white.opacity(0.4))
                 }
@@ -195,7 +197,7 @@ struct PairingFileDetailView: View {
                 .cornerRadius(12)
                 .frame(minHeight: 300, maxHeight: 500)
             } else {
-                Text("No pairing file installed.")
+                Text(localizedString("No pairing file installed."))
                     .font(.system(size: 14))
                     .foregroundColor(Color.white.opacity(0.5))
                     .padding(16)
@@ -208,11 +210,11 @@ struct PairingFileDetailView: View {
 
     private func metadataRow(label: String, value: String, valueColor: Color = .white) -> some View {
         HStack {
-            Text(label)
+            Text(localizedString(label))
                 .font(.system(size: 15))
                 .foregroundColor(Color.white.opacity(0.7))
             Spacer()
-            Text(value)
+            Text(localizedString(value))
                 .font(.system(size: 15, weight: .medium))
                 .foregroundColor(valueColor)
         }
@@ -228,7 +230,7 @@ struct PairingFileDetailView: View {
     }
 
     private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
+        let formatter = AppDateFormatter()
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
         return formatter.string(from: date)
@@ -250,15 +252,15 @@ struct PairingFileDetailView: View {
         }
 
         let alert = UIAlertController(
-            title: NSLocalizedString("Warning", comment: ""),
-            message: NSLocalizedString("Editing manually may corrupt the pairing file. Are you sure you know what you are doing and want to continue?", comment: ""),
+            title: localizedString("Warning"),
+            message: localizedString("Editing manually may corrupt the pairing file. Are you sure you know what you are doing and want to continue?"),
             preferredStyle: .alert
         )
         let contentVC = PairingFileEditAlertViewController()
         alert.setValue(contentVC, forKey: "contentViewController")
 
-        let cancelAction = UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel, handler: nil)
-        let continueAction = UIAlertAction(title: NSLocalizedString("Continue", comment: ""), style: .destructive) { _ in
+        let cancelAction = UIAlertAction(title: localizedString("Cancel"), style: .cancel, handler: nil)
+        let continueAction = UIAlertAction(title: localizedString("Continue"), style: .destructive) { _ in
             if contentVC.isChecked {
                 UserDefaults.standard.setPairingFileEditSuppressed(true, forHash: currentHash)
             }
@@ -273,7 +275,7 @@ struct PairingFileDetailView: View {
 
     private func saveEditedContent() {
         guard let data = editedContent.data(using: .utf8) else {
-            invalidPlistMessage = "Could not encode text as UTF-8."
+            invalidPlistMessage = localizedString("Could not encode text as UTF-8.")
             showingInvalidPlistAlert = true
             return
         }
@@ -281,7 +283,7 @@ struct PairingFileDetailView: View {
         do {
             _ = try PropertyListSerialization.propertyList(from: data, options: [], format: nil)
         } catch {
-            invalidPlistMessage = "The property list contains syntax errors: \(error.localizedDescription)"
+            invalidPlistMessage = String(format: localizedString("The property list contains syntax errors: %@"), error.localizedDescription)
             showingInvalidPlistAlert = true
             return
         }
@@ -292,7 +294,7 @@ struct PairingFileDetailView: View {
             UserDefaults.standard.setPairingFileEditSuppressed(true, forHash: currentSHA256)
             isEditing = false
         } catch {
-            invalidPlistMessage = "Failed to save pairing file: \(error.localizedDescription)"
+            invalidPlistMessage = String(format: localizedString("Failed to save pairing file: %@"), error.localizedDescription)
             showingInvalidPlistAlert = true
         }
     }

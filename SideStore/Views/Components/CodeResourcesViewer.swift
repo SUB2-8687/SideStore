@@ -76,22 +76,22 @@ struct CodeResourcesViewer: View {
                     InfoRow(label: "Total Sealed Files", value: "\(entries.count)")
                     InfoRow(label: "Signing Rules", value: "\(rules.count)")
                     let hasV2 = rawPlist?["files2"] != nil
-                    InfoRow(label: "Format Version", value: hasV2 ? "Version 2 (SHA-256)" : "Version 1 (SHA-1)")
+                    InfoRow(label: "Format Version", value: hasV2 ? NSLocalizedString("Version 2 (SHA-256)", comment: "") : NSLocalizedString("Version 1 (SHA-1)", comment: ""))
                 }
 
                 Section {
                     Picker("Display Mode", selection: $filterMode) {
                         ForEach(FilterMode.allCases, id: \.self) { mode in
-                            Text(mode.rawValue).tag(mode)
+                            Text(NSLocalizedString(mode.rawValue, comment: "")).tag(mode)
                         }
                     }
                     .pickerStyle(SegmentedPickerStyle())
                 }
 
                 if filterMode == .rules {
-                    Section(header: Text("Signing Rules (\(filteredRules.count))")) {
+                    Section(header: Text(String(format: NSLocalizedString("Signing Rules (%d)", comment: ""), filteredRules.count))) {
                         if filteredRules.isEmpty {
-                            Text("No rules matching '\(searchQuery)'")
+                            Text(String(format: NSLocalizedString("No rules matching '%@'", comment: ""), searchQuery))
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                         } else {
@@ -121,7 +121,7 @@ struct CodeResourcesViewer: View {
                                         }
                                     }
                                     if let w = rule.weight {
-                                        Text("Weight: \(String(format: "%.1f", w))")
+                                        Text(String(format: NSLocalizedString("Weight: %@", comment: ""), String(format: "%.1f", w)))
                                             .font(.caption)
                                             .foregroundColor(.secondary)
                                     }
@@ -131,9 +131,9 @@ struct CodeResourcesViewer: View {
                         }
                     }
                 } else {
-                    Section(header: Text("Sealed Files (\(filteredEntries.count))")) {
+                    Section(header: Text(String(format: NSLocalizedString("Sealed Files (%d)", comment: ""), filteredEntries.count))) {
                         if filteredEntries.isEmpty {
-                            Text(entries.isEmpty ? "No sealed files found" : "No files matching '\(searchQuery)'")
+                            Text(entries.isEmpty ? NSLocalizedString("No sealed files found", comment: "") : String(format: NSLocalizedString("No files matching '%@'", comment: ""), searchQuery))
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                         } else {
@@ -164,13 +164,13 @@ struct CodeResourcesViewer: View {
                                                 }
                                             }
                                             if let h2 = entry.hash2Hex {
-                                                Text("SHA-256: \(h2)")
+                                                Text(String(format: NSLocalizedString("SHA-256: %@", comment: ""), h2))
                                                     .font(.system(size: 10, design: .monospaced))
                                                     .foregroundColor(.secondary)
                                                     .lineLimit(1)
                                                     .truncationMode(.middle)
                                             } else if let h1 = entry.hashHex {
-                                                Text("SHA-1: \(h1)")
+                                                Text(String(format: NSLocalizedString("SHA-1: %@", comment: ""), h1))
                                                     .font(.system(size: 10, design: .monospaced))
                                                     .foregroundColor(.secondary)
                                                     .lineLimit(1)
@@ -191,13 +191,13 @@ struct CodeResourcesViewer: View {
                             HStack {
                                 Image(systemName: "list.bullet.rectangle")
                                     .foregroundColor(.green)
-                                Text("Explore Structure (\(plist.count) keys)")
+                                Text(String(format: NSLocalizedString("Explore Structure (%d keys)", comment: ""), plist.count))
                                     .font(.subheadline)
                             }
                         }
 
                         if !rawXML.isEmpty {
-                            NavigationLink(destination: ResourceTextViewer(title: "CodeResources XML", explicitContent: rawXML)) {
+                            NavigationLink(destination: ResourceTextViewer(title: NSLocalizedString("CodeResources XML", comment: ""), explicitContent: rawXML)) {
                                 HStack {
                                     Image(systemName: "doc.plaintext")
                                         .foregroundColor(.blue)

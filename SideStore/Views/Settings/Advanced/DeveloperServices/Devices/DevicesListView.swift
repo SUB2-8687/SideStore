@@ -52,7 +52,7 @@ struct DevicesListView: View {
 
     var body: some View {
         List {
-            Section(header: Text("Registered Devices (\(viewModel.devices.count))"), footer: Text("Devices registered on your developer team can run development-signed apps. Tap any device to edit its name, disable, or delete it.")) {
+            Section(header: Text(String(format: localizedString("Registered Devices (%d)"), viewModel.devices.count)), footer: Text(localizedString("Devices registered on your developer team can run development-signed apps. Tap any device to edit its name, disable, or delete it."))) {
                 if filteredDevices.isEmpty {
                     if viewModel.isLoading {
                         HStack {
@@ -62,7 +62,7 @@ struct DevicesListView: View {
                         }
                         .padding(.vertical, 8)
                     } else {
-                        Text(searchText.isEmpty ? "No devices registered on Developer Portal." : "No matching devices found.")
+                        Text(searchText.isEmpty ? localizedString("No devices registered on Developer Portal.") : localizedString("No matching devices found."))
                             .foregroundColor(.secondary)
                             .font(.subheadline)
                     }
@@ -74,12 +74,12 @@ struct DevicesListView: View {
                         } label: {
                             VStack(alignment: .leading, spacing: 4) {
                                 HStack {
-                                    Text(device.name.isEmpty ? "Device" : device.name)
+                                    Text(device.name.isEmpty ? localizedString("Device") : device.name)
                                         .font(.headline)
                                         .foregroundColor(.primary)
                                     Spacer()
                                     if device.status == "d" {
-                                        Text("Disabled")
+                                        Text(localizedString("Disabled"))
                                             .font(.caption2)
                                             .padding(.horizontal, 6)
                                             .padding(.vertical, 2)
@@ -87,7 +87,7 @@ struct DevicesListView: View {
                                             .foregroundColor(.red)
                                             .cornerRadius(6)
                                     }
-                                    Text(device.type.displayName)
+                                    Text(localizedString(device.type.displayName))
                                         .font(.caption2)
                                         .padding(.horizontal, 6)
                                         .padding(.vertical, 2)
@@ -163,11 +163,12 @@ struct DevicesListView: View {
         }
         #if !os(tvOS)
         .listStyle(InsetGroupedListStyle())
-        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic), prompt: "Search Devices")
+         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic), prompt: localizedString("Search Devices"))
         #else
         .listStyle(GroupedListStyle())
         #endif
-        .navigationTitle("Devices")
+        .navigationTitle(localizedString("Devices"))
+        .appLanguageEnvironment()
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 SwiftUI.Button {
@@ -186,19 +187,19 @@ struct DevicesListView: View {
         .sheet(isPresented: $showRegisterSheet) {
             NavigationView {
                 Form {
-                    Section(header: Text("Device Information"), footer: Text("UDID is a 25-character or 40-character unique device identifier.")) {
-                        TextField("Device Name", text: $newDeviceName)
-                        TextField("Device UDID", text: $newDeviceUDID)
+                    Section(header: Text(localizedString("Device Information")), footer: Text(localizedString("UDID is a 25-character or 40-character unique device identifier."))) {
+                        TextField(localizedString("Device Name"), text: $newDeviceName)
+                        TextField(localizedString("Device UDID"), text: $newDeviceUDID)
                             .autocapitalization(.none)
                             .disableAutocorrection(true)
 
                         Picker("Device Type", selection: $selectedDeviceType) {
-                            Text("iPhone").tag(ALTDeviceType.iphone)
-                            Text("iPad").tag(ALTDeviceType.ipad)
-                            Text("Apple TV").tag(ALTDeviceType.appleTV)
-                            Text("Apple Watch").tag(ALTDeviceType.appleWatch)
-                            Text("Mac").tag(ALTDeviceType.mac)
-                            Text("Vision Pro").tag(ALTDeviceType.visionPro)
+                            Text(localizedString("iPhone")).tag(ALTDeviceType.iphone)
+                            Text(localizedString("iPad")).tag(ALTDeviceType.ipad)
+                            Text(localizedString("Apple TV")).tag(ALTDeviceType.appleTV)
+                            Text(localizedString("Apple Watch")).tag(ALTDeviceType.appleWatch)
+                            Text(localizedString("Mac")).tag(ALTDeviceType.mac)
+                            Text(localizedString("Vision Pro")).tag(ALTDeviceType.visionPro)
                         }
                     }
 
@@ -218,7 +219,7 @@ struct DevicesListView: View {
                         } label: {
                             HStack {
                                 Image(systemName: "pencil")
-                                Text("Fill Current Device Name")
+                                Text(localizedString("Fill Current Device Name"))
                             }
                         }
 
@@ -242,9 +243,9 @@ struct DevicesListView: View {
                                         selectedDeviceType = .iphone
                                     }
                                     #endif
-                                    viewModel.showToastMessage("Fetched Device UDID: \(foundUDID.prefix(8))...")
+                                    viewModel.showToastMessage(String(format: localizedString("Fetched Device UDID: %@..."), String(foundUDID.prefix(8))))
                                 } else {
-                                    viewModel.showToastMessage("Current Device UDID not available")
+                                    viewModel.showToastMessage(localizedString("Current Device UDID not available"))
                                 }
                             }
                         } label: {
@@ -255,18 +256,19 @@ struct DevicesListView: View {
                                 } else {
                                     Image(systemName: "iphone.and.arrow.forward")
                                 }
-                                Text("Fetch Current Device UDID")
+                                Text(localizedString("Fetch Current Device UDID"))
                             }
                         }
                         .disabled(isFetchingUDID)
                     }
                 }
-                .navigationTitle("Register Device")
+                .navigationTitle(localizedString("Register Device"))
+                .appLanguageEnvironment()
                 .navigationBarItems(
-                    leading: SwiftUI.Button("Cancel") {
+                    leading: SwiftUI.Button(localizedString("Cancel")) {
                         showRegisterSheet = false
                     },
-                    trailing: SwiftUI.Button("Register") {
+                    trailing: SwiftUI.Button(localizedString("Register")) {
                         let name = newDeviceName.trimmingCharacters(in: .whitespacesAndNewlines)
                         let udid = newDeviceUDID.trimmingCharacters(in: .whitespacesAndNewlines)
                         guard !name.isEmpty, !udid.isEmpty else { return }
@@ -287,19 +289,19 @@ struct DevicesListView: View {
         .sheet(item: $deviceToEdit) { device in
             NavigationView {
                 Form {
-                    Section(header: Text("Device Name")) {
-                        TextField("Device Name", text: $editDeviceName)
+                    Section(header: Text(localizedString("Device Name"))) {
+                        TextField(localizedString("Device Name"), text: $editDeviceName)
                     }
 
-                    Section(header: Text("Device Identifier (UDID)")) {
-                        Text(device.identifier.isEmpty ? "Not Available" : device.identifier)
+                    Section(header: Text(localizedString("Device Identifier (UDID)"))) {
+                        Text(device.identifier.isEmpty ? localizedString("Not Available") : device.identifier)
                             .font(.system(.subheadline, design: .monospaced))
                             .foregroundColor(.secondary)
                     }
 
-                    Section(header: Text("Device Details")) {
+                    Section(header: Text(localizedString("Device Details"))) {
                         InfoRow(label: "Type", value: device.type.displayName)
-                        InfoRow(label: "Status", value: device.status == "d" ? "Disabled" : "Active", valueColor: device.status == "d" ? .red : .green)
+                        InfoRow(label: "Status", value: device.status == "d" ? localizedString("Disabled") : localizedString("Active"), valueColor: device.status == "d" ? .red : .green)
                         if let devID = device.deviceID, !devID.isEmpty {
                             InfoRow(label: "Portal ID", value: devID)
                         }
@@ -313,7 +315,7 @@ struct DevicesListView: View {
                                 HStack {
                                     Spacer()
                                     Image(systemName: "slash.circle")
-                                    Text("Disable Device")
+                                    Text(localizedString("Disable Device"))
                                         .fontWeight(.semibold)
                                     Spacer()
                                 }
@@ -327,19 +329,20 @@ struct DevicesListView: View {
                             HStack {
                                 Spacer()
                                 Image(systemName: "trash")
-                                Text("Delete Device")
+                                Text(localizedString("Delete Device"))
                                     .fontWeight(.semibold)
                                 Spacer()
                             }
                         }
                     }
                 }
-                .navigationTitle("Edit Device")
+                .navigationTitle(localizedString("Edit Device"))
+                .appLanguageEnvironment()
                 .navigationBarItems(
-                    leading: SwiftUI.Button("Cancel") {
+                    leading: SwiftUI.Button(localizedString("Cancel")) {
                         deviceToEdit = nil
                     },
-                    trailing: SwiftUI.Button("Save") {
+                    trailing: SwiftUI.Button(localizedString("Save")) {
                         let trimmed = editDeviceName.trimmingCharacters(in: .whitespacesAndNewlines)
                         guard !trimmed.isEmpty else { return }
                         Task {
@@ -355,9 +358,9 @@ struct DevicesListView: View {
                 )
                 .alert(isPresented: $showSheetDisableAlert) {
                     Alert(
-                        title: Text("Disable Device?"),
-                        message: Text("Are you sure you want to disable '\(device.name)' on the Apple Developer Portal? Disabled devices will not be included in newly generated provisioning profiles."),
-                        primaryButton: .default(Text("Disable")) {
+                        title: Text(localizedString("Disable Device?")),
+                        message: Text(String(format: localizedString("Are you sure you want to disable '%@' on the Apple Developer Portal? Disabled devices will not be included in newly generated provisioning profiles."), device.name)),
+                        primaryButton: .default(Text(localizedString("Disable"))) {
                             Task {
                                 let success = await viewModel.disableDevice(device, presentingViewController: presentingViewController)
                                 if success {
@@ -370,9 +373,9 @@ struct DevicesListView: View {
                 }
                 .alert(isPresented: $showSheetDeleteAlert) {
                     Alert(
-                        title: Text("Delete Device?"),
-                        message: Text("Are you sure you want to delete '\(device.name)' (\(device.identifier)) from the Apple Developer Portal?"),
-                        primaryButton: .destructive(Text("Delete")) {
+                        title: Text(localizedString("Delete Device?")),
+                        message: Text(String(format: localizedString("Are you sure you want to delete '%@' (%@) from the Apple Developer Portal?"), device.name, device.identifier)),
+                        primaryButton: .destructive(Text(localizedString("Delete"))) {
                             Task {
                                 let success = await viewModel.deleteDevice(device, presentingViewController: presentingViewController)
                                 if success {
@@ -389,9 +392,9 @@ struct DevicesListView: View {
             switch alert {
             case .disable(let device):
                 return Alert(
-                    title: Text("Disable Device?"),
-                    message: Text("Are you sure you want to disable '\(device.name)' on the Apple Developer Portal? Disabled devices will not be included in newly generated provisioning profiles."),
-                    primaryButton: .default(Text("Disable")) {
+                    title: Text(localizedString("Disable Device?")),
+                    message: Text(String(format: localizedString("Are you sure you want to disable '%@' on the Apple Developer Portal? Disabled devices will not be included in newly generated provisioning profiles."), device.name)),
+                    primaryButton: .default(Text(localizedString("Disable"))) {
                         Task {
                             _ = await viewModel.disableDevice(device, presentingViewController: presentingViewController)
                         }
@@ -400,9 +403,9 @@ struct DevicesListView: View {
                 )
             case .delete(let device):
                 return Alert(
-                    title: Text("Delete Device?"),
-                    message: Text("Are you sure you want to delete '\(device.name)' (\(device.identifier)) from the Apple Developer Portal?"),
-                    primaryButton: .destructive(Text("Delete")) {
+                    title: Text(localizedString("Delete Device?")),
+                    message: Text(String(format: localizedString("Are you sure you want to delete '%@' (%@) from the Apple Developer Portal?"), device.name, device.identifier)),
+                    primaryButton: .destructive(Text(localizedString("Delete"))) {
                         Task {
                             _ = await viewModel.deleteDevice(device, presentingViewController: presentingViewController)
                         }

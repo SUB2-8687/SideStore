@@ -149,7 +149,7 @@ struct AppInfoView: View {
                 // Provisioning Profile Section
                 if resignedProfileURL != nil || bundleProfileURL != nil {
                     Section(header: HStack {
-                        Text(showResignedProfile ? "Provisioning Profile (Resigned)" : "Provisioning Profile (Bundle)")
+                        Text(showResignedProfile ? localizedString("Provisioning Profile (Resigned)") : localizedString("Provisioning Profile (Bundle)"))
                         Spacer()
                         SwiftUI.Button {
                             showResignedProfile.toggle()
@@ -175,7 +175,7 @@ struct AppInfoView: View {
                                 SwiftUI.Button {
                                     showResignedProfile.toggle()
                                 } label: {
-                                    Label(showResignedProfile ? "Switch to Bundle Profile" : "Switch to Resigned Profile",
+                                    Label(showResignedProfile ? localizedString("Switch to Bundle Profile") : localizedString("Switch to Resigned Profile"),
                                           systemImage: showResignedProfile ? "circle" : "checkmark.circle.fill")
                                 }
                                 if let url = activeProfileURL {
@@ -190,10 +190,10 @@ struct AppInfoView: View {
                         } else {
                             HStack {
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text(showResignedProfile ? "No Resigned Profile Cached" : "No Bundle Profile Found")
+                                    Text(showResignedProfile ? localizedString("No Resigned Profile Cached") : localizedString("No Bundle Profile Found"))
                                         .font(.subheadline)
                                         .foregroundColor(.secondary)
-                                    Text("Tap toggle to view \(showResignedProfile ? "bundle" : "resigned") profile")
+                                    Text(showResignedProfile ? localizedString("Tap toggle to view bundle profile") : localizedString("Tap toggle to view resigned profile"))
                                         .font(.caption2)
                                         .foregroundColor(.secondary)
                                 }
@@ -210,7 +210,7 @@ struct AppInfoView: View {
                 // Info.plist Section
                 if resignedInfoPlistURL != nil || bundleInfoPlistURL != nil {
                     Section(header: HStack {
-                        Text(showResignedInfoPlist ? "Info.plist (Resigned)" : "Info.plist (Bundle)")
+                        Text(showResignedInfoPlist ? localizedString("Info.plist (Resigned)") : localizedString("Info.plist (Bundle)"))
                         Spacer()
                         SwiftUI.Button {
                             showResignedInfoPlist.toggle()
@@ -231,7 +231,7 @@ struct AppInfoView: View {
                                 SwiftUI.Button {
                                     showResignedInfoPlist.toggle()
                                 } label: {
-                                    Label(showResignedInfoPlist ? "Switch to Bundle Info.plist" : "Switch to Resigned Info.plist",
+                                    Label(showResignedInfoPlist ? localizedString("Switch to Bundle Info.plist") : localizedString("Switch to Resigned Info.plist"),
                                           systemImage: showResignedInfoPlist ? "circle" : "checkmark.circle.fill")
                                 }
                                 if let url = activeInfoPlistURL {
@@ -246,10 +246,10 @@ struct AppInfoView: View {
                         } else {
                             HStack {
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text(showResignedInfoPlist ? "No Resigned Info.plist Cached" : "No Bundle Info.plist Found")
+                                    Text(showResignedInfoPlist ? localizedString("No Resigned Info.plist Cached") : localizedString("No Bundle Info.plist Found"))
                                         .font(.subheadline)
                                         .foregroundColor(.secondary)
-                                    Text("Tap toggle to view \(showResignedInfoPlist ? "bundle" : "resigned") Info.plist")
+                                    Text(showResignedInfoPlist ? localizedString("Tap toggle to view bundle Info.plist") : localizedString("Tap toggle to view resigned Info.plist"))
                                         .font(.caption2)
                                         .foregroundColor(.secondary)
                                 }
@@ -294,6 +294,7 @@ struct AppInfoView: View {
             .listStyle(GroupedListStyle())
             #endif
             .navigationTitle("App Details")
+            .appLanguageEnvironment()
             .navigationBarItems(trailing: SwiftUI.Button("Close") {
                 presentationMode.wrappedValue.dismiss()
             })
@@ -309,7 +310,7 @@ struct AppInfoView: View {
     }
     
     private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
+        let formatter = AppDateFormatter()
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
         return formatter.string(from: date)
@@ -407,11 +408,12 @@ struct ProvisioningProfileDetailView: View {
         .listStyle(GroupedListStyle())
         #endif
         .navigationTitle("Profile Details")
+        .appLanguageEnvironment()
         .interactiveDismissDisabled(true)
     }
     
     private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
+        let formatter = AppDateFormatter()
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
         return formatter.string(from: date)
@@ -462,11 +464,11 @@ struct InfoRow: View {
     
     var body: some View {
         HStack {
-            Text(label)
+            Text(localizedString(label))
                 .font(.subheadline)
                 .foregroundColor(.secondary)
             Spacer()
-            Text(value)
+            Text(localizedString(value))
                 .font(.subheadline)
                 .foregroundColor(valueColor)
                 .multilineTextAlignment(.trailing)
@@ -481,11 +483,11 @@ struct ProfileInfoRow: View {
     
     var body: some View {
         HStack {
-            Text(label)
+            Text(localizedString(label))
                 .font(.subheadline)
                 .foregroundColor(.secondary)
             Spacer()
-            Text(value)
+            Text(localizedString(value))
                 .font(.subheadline)
                 .foregroundColor(valueColor)
                 .multilineTextAlignment(.trailing)
@@ -567,6 +569,7 @@ struct DeviceIDsView: View {
             }
         }
         .navigationTitle("Device IDs")
+        .appLanguageEnvironment()
         .interactiveDismissDisabled(true)
     }
 }
@@ -712,7 +715,7 @@ struct ExtensionInfoView: View {
             // Provisioning Profile
             if resignedProfileURL != nil || bundleProfileURL != nil {
                 Section(header: HStack {
-                    Text(showResignedProfile ? "Provisioning Profile (Resigned)" : "Provisioning Profile (Bundle)")
+                    Text(showResignedProfile ? localizedString("Provisioning Profile (Resigned)") : localizedString("Provisioning Profile (Bundle)"))
                     Spacer()
                     SwiftUI.Button {
                         showResignedProfile.toggle()
@@ -741,7 +744,7 @@ struct ExtensionInfoView: View {
                             SwiftUI.Button {
                                 showResignedProfile.toggle()
                             } label: {
-                                Label(showResignedProfile ? "Switch to Bundle Profile" : "Switch to Resigned Profile",
+                                Label(showResignedProfile ? localizedString("Switch to Bundle Profile") : localizedString("Switch to Resigned Profile"),
                                       systemImage: showResignedProfile ? "circle" : "checkmark.circle.fill")
                             }
                             if let url = activeProfileURL {
@@ -756,10 +759,10 @@ struct ExtensionInfoView: View {
                     } else {
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(showResignedProfile ? "No Resigned Profile Cached" : "No Bundle Profile Found")
+                                Text(showResignedProfile ? localizedString("No Resigned Profile Cached") : localizedString("No Bundle Profile Found"))
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
-                                Text("Tap toggle to view \(showResignedProfile ? "bundle" : "resigned") profile")
+                                Text(showResignedProfile ? localizedString("Tap toggle to view bundle profile") : localizedString("Tap toggle to view resigned profile"))
                                     .font(.caption2)
                                     .foregroundColor(.secondary)
                             }
@@ -776,7 +779,7 @@ struct ExtensionInfoView: View {
             // Info.plist
             if resignedInfoPlistURL != nil || bundleInfoPlistURL != nil {
                 Section(header: HStack {
-                    Text(showResignedInfoPlist ? "Info.plist (Resigned)" : "Info.plist (Bundle)")
+                    Text(showResignedInfoPlist ? localizedString("Info.plist (Resigned)") : localizedString("Info.plist (Bundle)"))
                     Spacer()
                     SwiftUI.Button {
                         showResignedInfoPlist.toggle()
@@ -797,7 +800,7 @@ struct ExtensionInfoView: View {
                             SwiftUI.Button {
                                 showResignedInfoPlist.toggle()
                             } label: {
-                                Label(showResignedInfoPlist ? "Switch to Bundle Info.plist" : "Switch to Resigned Info.plist",
+                                Label(showResignedInfoPlist ? localizedString("Switch to Bundle Info.plist") : localizedString("Switch to Resigned Info.plist"),
                                       systemImage: showResignedInfoPlist ? "circle" : "checkmark.circle.fill")
                             }
                             if let url = activeInfoPlistURL {
@@ -812,10 +815,10 @@ struct ExtensionInfoView: View {
                     } else {
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(showResignedInfoPlist ? "No Resigned Info.plist Cached" : "No Bundle Info.plist Found")
+                                Text(showResignedInfoPlist ? localizedString("No Resigned Info.plist Cached") : localizedString("No Bundle Info.plist Found"))
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
-                                Text("Tap toggle to view \(showResignedInfoPlist ? "bundle" : "resigned") Info.plist")
+                                Text(showResignedInfoPlist ? localizedString("Tap toggle to view bundle Info.plist") : localizedString("Tap toggle to view resigned Info.plist"))
                                     .font(.caption2)
                                     .foregroundColor(.secondary)
                             }
@@ -860,11 +863,12 @@ struct ExtensionInfoView: View {
         .listStyle(GroupedListStyle())
         #endif
         .navigationTitle(appExtension.name)
+        .appLanguageEnvironment()
         .interactiveDismissDisabled(true)
     }
 
     private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
+        let formatter = AppDateFormatter()
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
         return formatter.string(from: date)
@@ -1006,11 +1010,12 @@ struct BundleInspectorView: View {
         .listStyle(GroupedListStyle())
         #endif
         .navigationTitle(displayName)
+        .appLanguageEnvironment()
         .interactiveDismissDisabled(true)
     }
 
     private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
+        let formatter = AppDateFormatter()
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
         return formatter.string(from: date)

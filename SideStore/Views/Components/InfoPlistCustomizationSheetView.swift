@@ -117,7 +117,7 @@ extension InfoPlistCustomizationSheetView {
                 }
             )
 
-            let controller = SheetHostingController(rootView: AnyView(coreView))
+            let controller = SheetHostingController(rootView: AnyView(coreView.appLanguageEnvironment()))
             controller.dismissDelegate = dismissDelegate
             controller.modalPresentationStyle = .pageSheet
             controller.presentationController?.delegate = dismissDelegate

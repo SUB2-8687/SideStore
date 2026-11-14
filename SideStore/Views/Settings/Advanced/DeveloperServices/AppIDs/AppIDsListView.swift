@@ -34,7 +34,7 @@ struct AppIDsListView: View {
 
     var body: some View {
         List {
-            Section(header: Text("Registered App IDs (\(viewModel.appIDs.count))")) {
+            Section(header: Text(String(format: localizedString("Registered App IDs (%d)"), viewModel.appIDs.count))) {
                 if filteredAppIDs.isEmpty {
                     if viewModel.isLoading {
                         HStack {
@@ -44,7 +44,7 @@ struct AppIDsListView: View {
                         }
                         .padding(.vertical, 8)
                     } else {
-                        Text(searchText.isEmpty ? "No App IDs registered on Developer Portal." : "No matching App IDs found.")
+                        Text(searchText.isEmpty ? localizedString("No App IDs registered on Developer Portal.") : localizedString("No matching App IDs found."))
                             .foregroundColor(.secondary)
                             .font(.subheadline)
                     }
@@ -53,11 +53,11 @@ struct AppIDsListView: View {
                         NavigationLink(destination: AppIDDetailView(appID: appID, viewModel: viewModel, presentingViewController: presentingViewController)) {
                             VStack(alignment: .leading, spacing: 4) {
                                 HStack {
-                                    Text(appID.name.isEmpty ? "App ID" : appID.name)
+                                    Text(appID.name.isEmpty ? localizedString("App ID") : appID.name)
                                         .font(.headline)
                                     Spacer()
                                     if !appID.features.isEmpty {
-                                        Text("\(appID.features.count) features")
+                                        Text(String(format: localizedString("%d features"), appID.features.count))
                                             .font(.caption2)
                                             .padding(.horizontal, 6)
                                             .padding(.vertical, 2)
@@ -70,12 +70,12 @@ struct AppIDsListView: View {
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
                                 HStack {
-                                    Text("ID: \(appID.identifier)")
+                                    Text(String(format: localizedString("ID: %@"), appID.identifier))
                                         .font(.caption)
                                         .foregroundColor(.secondary)
                                     Spacer()
                                     if let expiration = appID.expirationDate {
-                                        Text("Expires: \(formatDate(expiration))")
+                                        Text(String(format: localizedString("Expires: %@"), formatDate(expiration)))
                                             .font(.caption)
                                             .foregroundColor(expiration < Date() ? .red : .secondary)
                                     }
@@ -107,11 +107,12 @@ struct AppIDsListView: View {
         }
         #if !os(tvOS)
         .listStyle(InsetGroupedListStyle())
-        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic), prompt: "Search App IDs")
+         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic), prompt: localizedString("Search App IDs"))
         #else
         .listStyle(GroupedListStyle())
         #endif
-        .navigationTitle("App IDs")
+        .navigationTitle(localizedString("App IDs"))
+        .appLanguageEnvironment()
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 SwiftUI.Button {
@@ -127,21 +128,22 @@ struct AppIDsListView: View {
         .sheet(isPresented: $showRegisterSheet) {
             NavigationView {
                 Form {
-                    Section(header: Text("App ID Information"), footer: Text("Bundle ID must match reverse-DNS format (e.g. com.example.myapp).")) {
-                        TextField("Name (e.g. My App)", text: $newAppIDName)
-                        TextField("Bundle Identifier", text: $newAppIDBundleID)
+                    Section(header: Text(localizedString("App ID Information")), footer: Text(localizedString("Bundle ID must match reverse-DNS format (e.g. com.example.myapp)."))) {
+                        TextField(localizedString("Name (e.g. My App)"), text: $newAppIDName)
+                        TextField(localizedString("Bundle Identifier"), text: $newAppIDBundleID)
                             .autocapitalization(.none)
                             .disableAutocorrection(true)
                     }
                 }
-                .navigationTitle("Register App ID")
+                .navigationTitle(localizedString("Register App ID"))
+                .appLanguageEnvironment()
                 .navigationBarItems(
-                    leading: SwiftUI.Button("Cancel") {
+                    leading: SwiftUI.Button(localizedString("Cancel")) {
                         newAppIDName = ""
                         newAppIDBundleID = ""
                         showRegisterSheet = false
                     },
-                    trailing: SwiftUI.Button("Register") {
+                    trailing: SwiftUI.Button(localizedString("Register")) {
                         let name = newAppIDName.trimmingCharacters(in: .whitespacesAndNewlines)
                         let bundleID = newAppIDBundleID.trimmingCharacters(in: .whitespacesAndNewlines)
                         guard !name.isEmpty, !bundleID.isEmpty else { return }
@@ -162,9 +164,9 @@ struct AppIDsListView: View {
         }
         .alert(isPresented: $showDeleteConfirmation) {
             Alert(
-                title: Text(viewModel.isPaidAccount ? "Delete App ID?" : "Warning: Delete App ID?"),
+                title: Text(viewModel.isPaidAccount ? localizedString("Delete App ID?") : localizedString("Warning: Delete App ID?")),
                 message: Text(deleteAlertMessage),
-                primaryButton: .destructive(Text("Delete")) {
+                primaryButton: .destructive(Text(localizedString("Delete"))) {
                     if let target = appIDToDelete {
                         Task {
                             _ = await viewModel.deleteAppID(target, presentingViewController: presentingViewController)
@@ -179,27 +181,26 @@ struct AppIDsListView: View {
 
     private var deleteAlertMessage: String {
         guard let appID = appIDToDelete else { return "" }
-        let name = appID.name.isEmpty ? "this App ID" : "'\(appID.name)'"
+        let name = appID.name.isEmpty ? localizedString("this App ID") : "'\(appID.name)'"
         let bundleID = appID.bundleIdentifier.isEmpty ? "" : " (\(appID.bundleIdentifier))"
 
         if viewModel.isPaidAccount {
-            return "Are you sure you want to delete \(name)\(bundleID)? This will also remove any associated provisioning profiles."
+            return String(format: localizedString("Are you sure you want to delete %@%@? This will also remove any associated provisioning profiles."), name, bundleID)
         }
 
-        var expiryNotice = "until it expires automatically after the remaining days of its usual 7-day validity."
         if let expiration = appID.expirationDate {
             let calendar = Calendar.current
             let components = calendar.dateComponents([.day], from: Date(), to: expiration)
             if let days = components.day, days > 0 {
-                expiryNotice = "until it expires automatically in \(days) day\(days == 1 ? "" : "s") (from its usual 7-day validity)."
+                return String(format: localizedString("Warning: Deleting %1$@%2$@ does not free up an App ID slot.\n\nThis App ID will become reserved and will not be available for use until it expires automatically in %3$d day(s) (from its usual 7-day validity).\n\nAre you sure you want to delete it?"), name, bundleID, days)
             }
         }
 
-        return "Warning: Deleting \(name)\(bundleID) does not free up an App ID slot.\n\nThis App ID will become reserved and will not be available for use \(expiryNotice)\n\nAre you sure you want to delete it?"
+        return String(format: localizedString("Warning: Deleting %@%@ does not free up an App ID slot.\n\nThis App ID will become reserved and will not be available for use until it expires automatically after the remaining days of its usual 7-day validity.\n\nAre you sure you want to delete it?"), name, bundleID)
     }
 
     private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
+        let formatter = AppDateFormatter()
         formatter.dateStyle = .short
         formatter.timeStyle = .none
         return formatter.string(from: date)

@@ -46,9 +46,9 @@ class ConsoleLogViewModel: ObservableObject {
     var activeHeaderTitle: String {
         switch activeSource {
         case .console:
-            return "Console Log"
+            return NSLocalizedString("Console Log", comment: "")
         case .widget:
-            return "Widget Log"
+            return NSLocalizedString("Widget Log", comment: "")
         case .imported(let url):
             return url.lastPathComponent
         }
@@ -149,7 +149,7 @@ class ConsoleLogViewModel: ObservableObject {
                     if let data = try fileHandle.readToEnd() {
                         let content = String(decoding: data, as: UTF8.self)
                         let lines = content.split(whereSeparator: \.isNewline).map { String($0) }
-                        let formattedLimit = ByteCountFormatter.string(fromByteCount: Int64(safeSizeLimit), countStyle: .file)
+                        let formattedLimit = AppFormat.bytes(Int64(safeSizeLimit))
                         var formattedLines = ["--- [File truncated: showing last \(formattedLimit) of log] ---"]
                         formattedLines.append(contentsOf: lines)
                         return (formattedLines, currentSize, true)
@@ -326,7 +326,7 @@ public struct ConsoleLogView: View {
                             viewModel.setSource(.imported(url: importedURL))
                         }) {
                             HStack {
-                                Text("Imported Log\n(\(importedURL.lastPathComponent))")
+                                Text(String(format: NSLocalizedString("Imported Log\n(%@)", comment: ""), importedURL.lastPathComponent))
                                 if case .imported = viewModel.activeSource {
                                     Image(systemName: "checkmark")
                                 }
@@ -420,7 +420,7 @@ public struct ConsoleLogView: View {
                        .disabled(viewModel.searchResults.isEmpty)
 
                        // Results counter
-                       Text("\(viewModel.currentSearchIndex + 1)/\(viewModel.searchResults.count)")
+                       Text(String(format: NSLocalizedString("%d/%d", comment: ""), viewModel.currentSearchIndex + 1, viewModel.searchResults.count))
                            .foregroundColor(.gray)
                            .font(.caption)
                    }
@@ -504,7 +504,7 @@ public struct ConsoleLogView: View {
             SwiftUI.Button("Console Log") { viewModel.setSource(.console) }
             SwiftUI.Button("Widget Log") { viewModel.setSource(.widget) }
             if let importedURL = viewModel.importedURL {
-                SwiftUI.Button("Imported Log (\(importedURL.lastPathComponent))") { viewModel.setSource(.imported(url: importedURL)) }
+                SwiftUI.Button(String(format: NSLocalizedString("Imported Log (%@)", comment: ""), importedURL.lastPathComponent)) { viewModel.setSource(.imported(url: importedURL)) }
             }
             if viewModel.importedURL == nil {
                 SwiftUI.Button("Import Log...") {

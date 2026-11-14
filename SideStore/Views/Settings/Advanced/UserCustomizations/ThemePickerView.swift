@@ -15,6 +15,7 @@ private extension Color {
 
 struct ThemePickerView: View {
     @ObservedObject private var themeManager = ThemeManager.shared
+    @ObservedObject private var languageManager = LanguageManager.shared
     @State private var selectedColor: Color = Color(uiColor: ThemeManager.shared.primaryColor)
 
     var body: some View {
@@ -49,6 +50,8 @@ struct ThemePickerView: View {
         .onAppear {
             selectedColor = Color(uiColor: themeManager.primaryColor)
         }
+        // Re-evaluate localized labels immediately when the in-app language changes.
+        .environment(\.locale, languageManager.locale)
     }
 
     private var previewSection: some View {
@@ -173,7 +176,7 @@ struct ThemePickerView: View {
                                 .stroke(Color.white.opacity(0.3), lineWidth: 1)
                         )
 
-                    Text(preset.name)
+                    Text(localizedString(preset.name))
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(.white)
                         .padding(.leading, 8)
@@ -216,11 +219,11 @@ struct ThemePickerView: View {
                 .padding(.horizontal, 16)
 
             VStack(spacing: 0) {
-                metricRow(label: "HEX Code", value: uiColor.hexString)
+                metricRow(label: localizedString("HEX Code"), value: uiColor.hexString)
                 Rectangle().fill(Color.settingsDivider).frame(height: 0.5).padding(.horizontal, 16)
-                metricRow(label: "RGB Format", value: "R: \(rgb.r)  G: \(rgb.g)  B: \(rgb.b)")
+                metricRow(label: localizedString("RGB Format"), value: "R: \(rgb.r)  G: \(rgb.g)  B: \(rgb.b)")
                 Rectangle().fill(Color.settingsDivider).frame(height: 0.5).padding(.horizontal, 16)
-                metricRow(label: "HSL Format", value: "H: \(hsl.h)°  S: \(hsl.s)%  L: \(hsl.l)%")
+                metricRow(label: localizedString("HSL Format"), value: "H: \(hsl.h)°  S: \(hsl.s)%  L: \(hsl.l)%")
             }
             .background(Color.settingsRowBackground)
             .cornerRadius(14)

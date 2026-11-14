@@ -54,9 +54,9 @@ struct WirelessPairTarget: Identifiable, Hashable {
     }
     
     var typeBadge: String {
-        if service.type.contains("manual-pairing") { return "Apple TV / Manual" }
-        if service.type.contains("pairable-host") { return "Pairable Host" }
-        if service.type.contains("remotepairing") { return "Remote Device" }
+        if service.type.contains("manual-pairing") { return localizedString("Apple TV / Manual") }
+        if service.type.contains("pairable-host") { return localizedString("Pairable Host") }
+        if service.type.contains("remotepairing") { return localizedString("Remote Device") }
         return BonjourDiscoveryManager.friendlyName(for: service.type) ?? service.type
     }
     
@@ -70,8 +70,12 @@ struct WirelessPairTarget: Identifiable, Hashable {
 @MainActor
 final class WirelessPairViewModel: ObservableObject {
     // Server Advertising State
-    @Published var statusText = "Ready to pair"
-    @Published var subStatusText = "Tap Start to advertise this device on the local network."
+    @Published var statusText = localizedString("Ready to pair")
+    @Published var subStatusText = localizedString("Tap Start to advertise this device on the local network.")
+    private var statusLocalizationKey = "Ready to pair"
+    private var statusFormatArguments: [CVarArg] = []
+    private var subStatusLocalizationKey = "Tap Start to advertise this device on the local network."
+    private var subStatusFormatArguments: [CVarArg] = []
     @Published var pinCode: String? = nil
     @Published var isAdvertising = false
     @Published var pairedDevice: MinimuxerPairedDevice? = nil
@@ -138,8 +142,8 @@ final class WirelessPairViewModel: ObservableObject {
                 guard let self = self else { return }
                 self.serviceID = serviceID
                 self.port = port
-                self.statusText = "Advertising server..."
-                self.subStatusText = "Ensure both devices are on the same Wi-Fi."
+                self.setStatusText("Advertising server...")
+                self.setSubStatusText("Ensure both devices are on the same Wi-Fi.")
             }
         }
         
@@ -148,8 +152,8 @@ final class WirelessPairViewModel: ObservableObject {
             Task { @MainActor in
                 guard let self = self else { return }
                 self.pinCode = pin
-                self.statusText = "Device Connected"
-                self.subStatusText = "Enter the pairing code shown below on your other device settings screen."
+                self.setStatusText("Device Connected")
+                self.setSubStatusText("Enter the pairing code shown below on your other device settings screen.")
             }
         }
         
@@ -160,12 +164,35 @@ final class WirelessPairViewModel: ObservableObject {
                 self.pinPromptCallback = submitPin
                 self.enteredPin = ""
                 self.isPinPromptPresented = true
-                self.statusText = "Enter Pairing PIN"
-                self.subStatusText = "Enter the 6-digit code shown on your Apple TV / device screen."
+                self.setStatusText("Enter Pairing PIN")
+                self.setSubStatusText("Enter the 6-digit code shown on your Apple TV / device screen.")
             }
         }
     }
     
+    func refreshLocalizedStatusText() {
+        statusText = formatLocalizedText(statusLocalizationKey, arguments: statusFormatArguments)
+        subStatusText = formatLocalizedText(subStatusLocalizationKey, arguments: subStatusFormatArguments)
+    }
+
+    private func setStatusText(_ key: String, arguments: [CVarArg] = []) {
+        statusLocalizationKey = key
+        statusFormatArguments = arguments
+        statusText = formatLocalizedText(key, arguments: arguments)
+    }
+
+    private func setSubStatusText(_ key: String, arguments: [CVarArg] = []) {
+        subStatusLocalizationKey = key
+        subStatusFormatArguments = arguments
+        subStatusText = formatLocalizedText(key, arguments: arguments)
+    }
+
+    private func formatLocalizedText(_ key: String, arguments: [CVarArg]) -> String {
+        let format = localizedString(key)
+        guard !arguments.isEmpty else { return format }
+        return String(format: format, locale: LanguageManager.shared.locale, arguments: arguments)
+    }
+
     func submitEnteredPin() {
         let pin = enteredPin.trimmingCharacters(in: .whitespacesAndNewlines)
         let finalPin = pin.isEmpty ? "000000" : pin
@@ -492,8 +519,8 @@ final class WirelessPairViewModel: ObservableObject {
         errorMessage = nil
         serviceID = nil
         port = nil
-        statusText = "Waiting for connection..."
-        subStatusText = "Open Remote Pairing on your Apple TV / Vision Pro / host device to discover this server."
+        setStatusText("Waiting for connection...")
+        setSubStatusText("Open Remote Pairing on your Apple TV / Vision Pro / host device to discover this server.")
         
         wirelessPairing.start(
             outPath: docsPath,
@@ -514,15 +541,15 @@ final class WirelessPairViewModel: ObservableObject {
                 case .success(let device):
                     debugLog("[WirelessPairViewModel] startPairing() SUCCESS with device: name='\(device.name)', model='\(device.model)'")
                     self.pairedDevice = device
-                    self.statusText = "Success!"
-                    self.subStatusText = "Successfully paired with \(device.name) (\(device.model))!\nPairing file saved to documents."
+                    self.setStatusText("Success!")
+                    self.setSubStatusText("Successfully paired with %@ (%@)!\nPairing file saved to documents.", arguments: [device.name, String(describing: device.model)])
                     self.shareSheetURL = URL(fileURLWithPath: device.pairingFilePath)
                     self.isShareSheetPresented = true
                 case .failure(let error):
                     debugLog("[WirelessPairViewModel] startPairing() FAILURE: error='\(error.localizedDescription)'")
                     self.errorMessage = error.localizedDescription
-                    self.statusText = "Pairing Failed"
-                    self.subStatusText = "An error occurred during pairing."
+                    self.setStatusText("Pairing Failed")
+                    self.setSubStatusText("An error occurred during pairing.")
                 }
             }
         }
@@ -533,8 +560,8 @@ final class WirelessPairViewModel: ObservableObject {
         wirelessPairing.stop()
         
         isAdvertising = false
-        statusText = "Ready to pair"
-        subStatusText = "Tap Start to advertise this device on the local network."
+        setStatusText("Ready to pair")
+        setSubStatusText("Tap Start to advertise this device on the local network.")
         pinCode = nil
         errorMessage = nil
         serviceID = nil
@@ -554,8 +581,8 @@ final class WirelessPairViewModel: ObservableObject {
         errorMessage = nil
         serviceID = nil
         port = nil
-        statusText = "Connecting to device..."
-        subStatusText = "Initiating pairing handshake on \(targetIp):\(targetPort)..."
+        setStatusText("Connecting to device...")
+        setSubStatusText("Initiating pairing handshake on %@:%@...", arguments: [targetIp, String(targetPort)])
         
         wirelessPairing.trigger(
             targetIp: targetIp,
@@ -577,15 +604,15 @@ final class WirelessPairViewModel: ObservableObject {
                 case .success(let device):
                     debugLog("[WirelessPairViewModel] triggerPairing() SUCCESS with device: name='\(device.name)', model='\(device.model)'")
                     self.pairedDevice = device
-                    self.statusText = "Success!"
-                    self.subStatusText = "Successfully paired with \(device.name) (\(device.model))!\nPairing file saved to documents."
+                    self.setStatusText("Success!")
+                    self.setSubStatusText("Successfully paired with %@ (%@)!\nPairing file saved to documents.", arguments: [device.name, String(describing: device.model)])
                     self.shareSheetURL = URL(fileURLWithPath: device.pairingFilePath)
                     self.isShareSheetPresented = true
                 case .failure(let error):
                     debugLog("[WirelessPairViewModel] triggerPairing() FAILURE: error='\(error.localizedDescription)'")
                     self.errorMessage = error.localizedDescription
-                    self.statusText = "Pairing Failed"
-                    self.subStatusText = "An error occurred during pairing: \(error.localizedDescription)"
+                    self.setStatusText("Pairing Failed")
+                    self.setSubStatusText("An error occurred during pairing: %@", arguments: [error.localizedDescription])
                 }
                 completion?(result)
             }

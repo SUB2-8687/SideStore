@@ -23,7 +23,7 @@ struct CertificatePortalDetailView: View {
 
     var body: some View {
         List {
-            Section(header: Text("Certificate Details")) {
+            Section(header: Text(localizedString("Certificate Details"))) {
                 InfoRow(label: "Name", value: certificate.name)
                 InfoRow(label: "Serial Number", value: certificate.serialNumber)
                 if let identifier = certificate.identifier {
@@ -61,17 +61,17 @@ struct CertificatePortalDetailView: View {
                 }
                 InfoRow(label: "Created Date", value: formatDate(certificate.creationDate))
                 InfoRow(label: "Expiration Date", value: formatDate(certificate.expiryDate), valueColor: isExpired ? .red : .primary)
-                InfoRow(label: "Status", value: isExpired ? "Expired" : "Active", valueColor: isExpired ? .red : .green)
+                InfoRow(label: "Status", value: isExpired ? localizedString("Expired") : localizedString("Active"), valueColor: isExpired ? .red : .green)
             }
 
-            Section(footer: Text("Revoking a certificate permanently invalidates it on Apple's servers. Any provisioning profiles tied exclusively to this certificate may need to be re-generated.")) {
+            Section(footer: Text(localizedString("Revoking a certificate permanently invalidates it on Apple's servers. Any provisioning profiles tied exclusively to this certificate may need to be re-generated."))) {
                 SwiftUI.Button(role: .destructive) {
                     showRevokeAlert = true
                 } label: {
                     HStack {
                         Spacer()
                         Image(systemName: "trash")
-                        Text("Revoke Certificate on Portal")
+                        Text(localizedString("Revoke Certificate on Portal"))
                             .fontWeight(.semibold)
                         Spacer()
                     }
@@ -84,14 +84,15 @@ struct CertificatePortalDetailView: View {
         .listStyle(GroupedListStyle())
         #endif
         .navigationTitle(certificate.name)
+        .appLanguageEnvironment()
         .refreshable {
             await viewModel.fetchCertificates(presentingViewController: presentingViewController, isPullToRefresh: true)
         }
         .alert(isPresented: $showRevokeAlert) {
             Alert(
-                title: Text("Revoke Certificate?"),
-                message: Text("Are you sure you want to revoke '\(certificate.name)' on the Apple Developer Portal? This action cannot be undone."),
-                primaryButton: .destructive(Text("Revoke")) {
+                title: Text(localizedString("Revoke Certificate?")),
+                message: Text(String(format: localizedString("Are you sure you want to revoke '%@' on the Apple Developer Portal? This action cannot be undone."), certificate.name)),
+                primaryButton: .destructive(Text(localizedString("Revoke"))) {
                     Task {
                         let success = await viewModel.revokeCertificate(certificate, presentingViewController: presentingViewController)
                         if success {
@@ -105,7 +106,7 @@ struct CertificatePortalDetailView: View {
     }
 
     private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
+        let formatter = AppDateFormatter()
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
         return formatter.string(from: date)
