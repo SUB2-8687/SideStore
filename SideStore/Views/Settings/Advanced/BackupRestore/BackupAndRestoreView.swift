@@ -7,6 +7,8 @@ private extension Color {
 }
 
 struct BackupAndRestoreView: View {
+    /// 언어가 바뀌면 body 를 다시 평가해 localized() 로 미리 계산한 문구도 새 언어로 갱신한다.
+    @ObservedObject var appLanguageObserver = LanguageManager.shared
     @State private var showingImportFilePicker = false
     @State private var importedData: Data? = nil
     @State private var showingImportPasswordAlert = false
@@ -123,7 +125,7 @@ struct BackupAndRestoreView: View {
             .padding(.bottom, 32)
         }
         .background(Color(uiColor: .settingsBackground).ignoresSafeArea())
-        .navigationTitle("Backup & Restore")
+        .appLocalizedNavigationTitle("Backup & Restore")
         #if !os(tvOS)
         .navigationBarTitleDisplayMode(.large)
         #endif
@@ -239,7 +241,7 @@ struct BackupAndRestoreView: View {
                 self.importedAccount = account
                 
                 if let pass = account.password, !pass.isEmpty {
-                    showAlert(title: "Account Imported", message: "Account \(account.email) imported successfully!")
+                    showAlert(title: "Account Imported", message: String(format: NSLocalizedString("Account %@ imported successfully!", comment: ""), account.email))
                 } else {
                     self.applePasswordInput = ""
                     self.showingApplePasswordAlert = true
@@ -253,12 +255,12 @@ struct BackupAndRestoreView: View {
     private func performAppleSignIn() {
         guard let account = importedAccount, !applePasswordInput.isEmpty else { return }
         AuthManager.shared.password = applePasswordInput
-        showAlert(title: "Account Imported", message: "Account \(account.email) imported successfully!")
+        showAlert(title: "Account Imported", message: String(format: NSLocalizedString("Account %@ imported successfully!", comment: ""), account.email))
     }
 
     private func showAlert(title: String, message: String) {
-        self.alertTitle = title
-        self.alertMessage = message
+        self.alertTitle = NSLocalizedString(title, comment: "")
+        self.alertMessage = NSLocalizedString(message, comment: "")
         self.showingMessageAlert = true
     }
 }

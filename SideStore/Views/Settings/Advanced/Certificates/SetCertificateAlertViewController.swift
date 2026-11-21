@@ -56,26 +56,29 @@ final class SetCertificateAlertViewController: UIViewController {
         debugLog("[SetCertAlert] currentCertObj found: \(currentCertObj != nil), serial: '\(currentSerial)', name: '\(currentName)', machine: '\(currentMachine)', email: '\(currentEmail)'")
         debugLog("[SetCertAlert] targetCert serial: '\(targetSerial)', name: '\(targetName)', machine: '\(targetMachine)', email: '\(targetEmail)'")
         
-        let details = """
-          • App: \(installedApp.name)
-          • Bundle ID: \(installedApp.resignedBundleIdentifier)
-
-        [CURRENT APP CERTIFICATE]
-          • Name: \(currentName)
-          • Machine: \(currentMachine)
-          • Serial: \(currentSerial)
-          • Type: \(currentType)
-          • Validity: \(currentValidity)
-          • Email: \(currentEmail)
-
-        [TARGET CERTIFICATE]
-          • Name: \(targetName)
-          • Machine: \(targetMachine)
-          • Serial: \(targetSerial)
-          • Type: \(targetType)
-          • Validity: \(targetValidity)
-          • Email: \(targetEmail)
-        """
+        func row(_ label: String, _ value: String) -> String {
+            return "  • " + NSLocalizedString(label, comment: "") + ": " + value
+        }
+        let details = [
+            row("App", installedApp.name),
+            row("Bundle ID", installedApp.resignedBundleIdentifier),
+            "",
+            NSLocalizedString("[CURRENT APP CERTIFICATE]", comment: ""),
+            row("Name", currentName),
+            row("Machine", currentMachine),
+            row("Serial", currentSerial),
+            row("Type", currentType),
+            row("Validity", currentValidity),
+            row("Email", currentEmail),
+            "",
+            NSLocalizedString("[TARGET CERTIFICATE]", comment: ""),
+            row("Name", targetName),
+            row("Machine", targetMachine),
+            row("Serial", targetSerial),
+            row("Type", targetType),
+            row("Validity", targetValidity),
+            row("Email", targetEmail)
+        ].joined(separator: "\n")
         
         let detailsLabel = UILabel()
         detailsLabel.text = details

@@ -10,6 +10,8 @@ import SwiftUI
 import SideSign
 
 struct ActiveCertSectionView: View {
+    /// 언어가 바뀌면 body 를 다시 평가해 localized() 로 미리 계산한 문구도 새 언어로 갱신한다.
+    @ObservedObject var appLanguageObserver = LanguageManager.shared
     @ObservedObject var viewModel: CertificatesViewModel
     @Binding var hasCopiedActiveSerial: Bool
     var onDeactivate: () -> Void
@@ -77,7 +79,7 @@ struct ActiveCertSectionView: View {
                         if viewModel.revealedSerials.contains(key) { viewModel.revealedSerials.remove(key) }
                         else { viewModel.revealedSerials.insert(key) }
                     } label: {
-                        Label(isMasked ? "Reveal Details" : "Hide Details",
+                        Label(isMasked ? NSLocalizedString("Reveal Details", comment: "") : NSLocalizedString("Hide Details", comment: ""),
                               systemImage: isMasked ? "eye" : "eye.slash")
                     }
                     #if !os(tvOS)
@@ -95,8 +97,8 @@ struct ActiveCertSectionView: View {
                 }
             } else {
                 Text(viewModel.team == nil
-                     ? "No active local certificate found.Import a .p12 file to sign your apps."
-                     : "No active local certificate found.Create a new certificate or import a .p12 file to sign your apps.")
+                     ? NSLocalizedString("No active local certificate found.Import a .p12 file to sign your apps.", comment: "")
+                     : NSLocalizedString("No active local certificate found.Create a new certificate or import a .p12 file to sign your apps.", comment: ""))
                     .foregroundColor(.secondary)
                     .font(.subheadline)
             }

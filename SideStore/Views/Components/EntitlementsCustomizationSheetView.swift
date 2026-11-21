@@ -101,7 +101,7 @@ extension EntitlementsCustomizationSheetView {
                 }
             )
 
-            let controller = SheetHostingController(rootView: AnyView(coreView))
+            let controller = SheetHostingController(rootView: AnyView(coreView.appLanguageEnvironment()))
             controller.dismissDelegate = dismissDelegate
             controller.presentationController?.delegate = dismissDelegate
             controller.modalPresentationStyle = .pageSheet

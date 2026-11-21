@@ -11,6 +11,8 @@ import UniformTypeIdentifiers
 import SideSign
 
 struct PrivateKeyTextInputView: View {
+    /// 언어가 바뀌면 body 를 다시 평가해 localized() 로 미리 계산한 문구도 새 언어로 갱신한다.
+    @ObservedObject var appLanguageObserver = LanguageManager.shared
     @Binding var text: String
     let cert: ALTX509Certificate
     let viewModel: CertificatesViewModel
@@ -67,7 +69,7 @@ struct PrivateKeyTextInputView: View {
                                     isEditing = false
                                     errorMessage = nil
                                 } catch {
-                                    errorMessage = "Failed to read file: \(error.localizedDescription)"
+                                    errorMessage = String(format: NSLocalizedString("Failed to read file: %@", comment: ""), error.localizedDescription)
                                 }
                             }
                         }
@@ -102,7 +104,7 @@ struct PrivateKeyTextInputView: View {
                 .padding(.horizontal)
                 .padding(.bottom)
             }
-            .navigationTitle("Add Private Key")
+            .appLocalizedNavigationTitle("Add Private Key")
             #if !os(tvOS)
             .navigationBarTitleDisplayMode(.inline)
             #endif
@@ -138,11 +140,11 @@ struct PrivateKeyTextInputView: View {
                             isEditing = false
                             errorMessage = nil
                         } catch {
-                            errorMessage = "Failed to read file: \(error.localizedDescription)"
+                            errorMessage = String(format: NSLocalizedString("Failed to read file: %@", comment: ""), error.localizedDescription)
                         }
                     }
                 case .failure(let error):
-                    errorMessage = "Failed to select file: \(error.localizedDescription)"
+                    errorMessage = String(format: NSLocalizedString("Failed to select file: %@", comment: ""), error.localizedDescription)
                 }
             }
             #endif
@@ -151,7 +153,7 @@ struct PrivateKeyTextInputView: View {
                     onCancel()
                 }
             } message: {
-                Text("Key was added to certificate \(cert.name) (SN: \(cert.serialNumber)).")
+                Text(String(format: NSLocalizedString("Key was added to certificate %@ (SN: %@).", comment: ""), cert.name, cert.serialNumber))
             }
         }
     }

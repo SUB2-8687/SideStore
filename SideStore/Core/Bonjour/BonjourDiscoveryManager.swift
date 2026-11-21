@@ -14,7 +14,12 @@ import Minimuxer
 struct ServiceTypeInfo: Identifiable, Hashable {
     var id: String { rawType }
     let rawType: String
-    let friendlyName: String?
+    
+    /// 저장하지 않고 조회 시점의 앱 언어로 계산한다. (처음 발견된 시점의 언어로 고정되는 문제 방지)
+    var friendlyName: String? {
+        let normalized = rawType.hasSuffix(".") ? rawType : rawType + "."
+        return commonKnownServiceTypes[normalized]
+    }
     
     var displayName: String {
         friendlyName ?? rawType
@@ -181,10 +186,7 @@ final class BonjourDiscoveryManager: NSObject, ObservableObject, NetServiceDeleg
                     if !results.isEmpty {
                         Task { @MainActor in
                             if self.discoveredTypes.insert(t).inserted {
-                                let info = ServiceTypeInfo(
-                                    rawType: t,
-                                    friendlyName: Self.friendlyName(for: t)
-                                )
+                                let info = ServiceTypeInfo(rawType: t)
                                 if !self.serviceTypes.contains(where: { $0.rawType == t }) {
                                     self.serviceTypes.append(info)
                                     self.serviceTypes.sort { $0.displayName.localizedCaseInsensitiveCompare($1.displayName) == .orderedAscending }
@@ -553,10 +555,7 @@ final class BonjourDiscoveryManager: NSObject, ObservableObject, NetServiceDeleg
         let rawType = "\(service.name).\(service.type)"
         Task { @MainActor in
             if self.discoveredTypes.insert(rawType).inserted {
-                let info = ServiceTypeInfo(
-                    rawType: rawType,
-                    friendlyName: Self.friendlyName(for: rawType)
-                )
+                let info = ServiceTypeInfo(rawType: rawType)
                 self.serviceTypes.append(info)
                 self.serviceTypes.sort { $0.displayName.localizedCaseInsensitiveCompare($1.displayName) == .orderedAscending }
             }

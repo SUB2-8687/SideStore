@@ -28,7 +28,7 @@ struct ExperimentalFeaturesView: View {
                     
                     VStack(spacing: 0) {
                         if #available(iOS 26.0, *) {
-                            NavigationLink(destination: WirelessPairView()) {
+                            NavigationLink(destination: WirelessPairView().appLanguageEnvironment(rebuildsOnChange: false)) {
                                 HStack {
                                     Text("Wireless Pairing")
                                         .font(.system(size: 17, weight: .bold))
@@ -45,7 +45,7 @@ struct ExperimentalFeaturesView: View {
                             divider
                         }
                         
-                        NavigationLink(destination: CacheManagementView()) {
+                        NavigationLink(destination: CacheManagementView().appLanguageEnvironment(rebuildsOnChange: false)) {
                             HStack {
                                 Text("Cache Management")
                                     .font(.system(size: 17, weight: .bold))
@@ -88,7 +88,7 @@ struct ExperimentalFeaturesView: View {
             .padding(.bottom, 32)
         }
         .background(Color(uiColor: .settingsBackground).ignoresSafeArea())
-        .navigationTitle("Experimental Features")
+        .appLocalizedNavigationTitle("Experimental Features")
         #if !os(tvOS)
         .navigationBarTitleDisplayMode(.large)
         #endif
@@ -96,7 +96,7 @@ struct ExperimentalFeaturesView: View {
 
     private func toggleRow(title: String, isOn: Binding<Bool>) -> some View {
         HStack {
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.system(size: 17, weight: .bold))
                 .foregroundColor(.white)
                 .fixedSize(horizontal: false, vertical: true)

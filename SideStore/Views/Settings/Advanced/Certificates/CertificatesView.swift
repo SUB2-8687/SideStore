@@ -11,6 +11,8 @@ import SideSign
 import UniformTypeIdentifiers
 
 struct CertificatesView: View {
+    /// 언어가 바뀌면 body 를 다시 평가해 localized() 로 미리 계산한 문구도 새 언어로 갱신한다.
+    @ObservedObject var appLanguageObserver = LanguageManager.shared
     weak var presentingViewController: UIViewController?
     
     @StateObject private var viewModel = CertificatesViewModel()
@@ -82,7 +84,7 @@ struct CertificatesView: View {
                     }
                 }
             }
-            .navigationTitle("Certificates")
+            .appLocalizedNavigationTitle("Certificates")
             .toolbar {
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
                     SwiftUI.Button {
@@ -147,7 +149,7 @@ struct CertificatesView: View {
             SwiftUI.Button("Import") { viewModel.submitImportPassword() }
             SwiftUI.Button("Cancel", role: .cancel) { viewModel.cancelImport() }
         } message: {
-            Text("Enter the password to decrypt the imported certificate file.\n\nFile: \(viewModel.currentImportFilename)")
+            Text(String(format: NSLocalizedString("Enter the password to decrypt the imported certificate file.\n\nFile: %@", comment: ""), viewModel.currentImportFilename))
         }
         .alert("Success", isPresented: $viewModel.showAlert) {
             SwiftUI.Button("OK", role: .cancel) { viewModel.alertMessage = nil }
@@ -177,7 +179,7 @@ struct CertificatesView: View {
                             .foregroundColor(.red)
                     }
                 }
-                .navigationTitle("Import Failures")
+                .appLocalizedNavigationTitle("Import Failures")
                 #if !os(tvOS)
                 .navigationBarTitleDisplayMode(.inline)
                 #endif
@@ -211,7 +213,7 @@ struct CertificatesView: View {
             SwiftUI.Button("Cancel", role: .cancel) { certificateToClearKeyFor = nil }
         } message: {
             if let cert = certificateToClearKeyFor {
-                Text("This will clear the locally stored private key of this certificate.\n\nName: \(cert.name)\nS/N: \(cert.serialNumber)")
+                Text(String(format: NSLocalizedString("This will clear the locally stored private key of this certificate.\n\nName: %@\nS/N: %@", comment: ""), cert.name, cert.serialNumber))
             }
         }
         #if !os(tvOS)
@@ -286,7 +288,7 @@ struct CertificatesView: View {
             requestedDate: cert.requestedDate,
             serialNumDecimal: cert.serialNumDecimal
         )
-        let detailVC = UIHostingController(rootView: CertificateDetailView(certificate: cert, portalMetadata: metadata, viewModel: viewModel))
+        let detailVC = UIHostingController(rootView: CertificateDetailView(certificate: cert, portalMetadata: metadata, viewModel: viewModel).appLanguageEnvironment())
         #if !os(tvOS)
         let appearance = UINavigationBarAppearance()
         appearance.configureWithDefaultBackground()
@@ -378,6 +380,8 @@ private struct LoadingOverlay: View {
 }
 
 private struct CreateCertificateSheetView: View {
+    /// 언어가 바뀌면 body 를 다시 평가해 localized() 로 미리 계산한 문구도 새 언어로 갱신한다.
+    @ObservedObject var appLanguageObserver = LanguageManager.shared
     @ObservedObject var viewModel: CertificatesViewModel
     var presentingViewController: UIViewController?
     @Binding var isPresented: Bool
@@ -399,8 +403,8 @@ private struct CreateCertificateSheetView: View {
                 Section(
                     header: Text("Certificate Information"),
                     footer: Text(isPaidWarningVisible
-                        ? "This certificate type requires a paid Apple Developer account."
-                        : "Select the certificate type and machine name. This registers the certificate on Apple's servers and saves the private key locally.")
+                        ? NSLocalizedString("This certificate type requires a paid Apple Developer account.", comment: "")
+                        : NSLocalizedString("Select the certificate type and machine name. This registers the certificate on Apple's servers and saves the private key locally.", comment: ""))
                 ) {
                     Picker("Certificate Type", selection: $selectedCertificateType) {
                         ForEach(viewModel.availableCertificateTypes, id: \.rawValue) { certType in
@@ -411,7 +415,7 @@ private struct CreateCertificateSheetView: View {
                     TextField("Machine Name", text: $machineName)
                 }
             }
-            .navigationTitle("New Certificate")
+            .appLocalizedNavigationTitle("New Certificate")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     SwiftUI.Button("Cancel") {

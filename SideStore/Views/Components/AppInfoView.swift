@@ -16,6 +16,8 @@ struct ShareableURLItem: Identifiable {
 }
 
 struct AppInfoView: View {
+    /// 언어가 바뀌면 body 를 다시 평가해 localized() 로 미리 계산한 문구도 새 언어로 갱신한다.
+    @ObservedObject var appLanguageObserver = LanguageManager.shared
     let installedApp: InstalledApp
     @Environment(\.presentationMode) var presentationMode
     @StateObject private var certificatesViewModel = CertificatesViewModel()
@@ -128,7 +130,7 @@ struct AppInfoView: View {
                     if let execName = infoPlist?["CFBundleExecutable"] as? String {
                         let execURL = appBundleURL.appendingPathComponent(execName)
                         if FileManager.default.fileExists(atPath: execURL.path) && MachOParser.isMachOBinary(at: execURL) {
-                            NavigationLink(destination: MachOResourceViewer(url: execURL)) {
+                            NavigationLink(destination: MachOResourceViewer(url: execURL).appLanguageEnvironment(rebuildsOnChange: false)) {
                                 HStack {
                                     Text("Executable")
                                         .font(.subheadline)
@@ -149,7 +151,7 @@ struct AppInfoView: View {
                 // Provisioning Profile Section
                 if resignedProfileURL != nil || bundleProfileURL != nil {
                     Section(header: HStack {
-                        Text(showResignedProfile ? "Provisioning Profile (Resigned)" : "Provisioning Profile (Bundle)")
+                        Text(showResignedProfile ? localizedString("Provisioning Profile (Resigned)") : localizedString("Provisioning Profile (Bundle)"))
                         Spacer()
                         SwiftUI.Button {
                             showResignedProfile.toggle()
@@ -161,7 +163,7 @@ struct AppInfoView: View {
                         .buttonStyle(BorderlessButtonStyle())
                     }) {
                         if let profile = provisioningProfile {
-                            NavigationLink(destination: ProvisioningProfileDetailView(profile: profile, profileURL: activeProfileURL, certificatesViewModel: certificatesViewModel)) {
+                            NavigationLink(destination: ProvisioningProfileDetailView(profile: profile, profileURL: activeProfileURL, certificatesViewModel: certificatesViewModel).appLanguageEnvironment(rebuildsOnChange: false)) {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text(profile.name)
                                         .font(.subheadline)
@@ -175,7 +177,7 @@ struct AppInfoView: View {
                                 SwiftUI.Button {
                                     showResignedProfile.toggle()
                                 } label: {
-                                    Label(showResignedProfile ? "Switch to Bundle Profile" : "Switch to Resigned Profile",
+                                    Label(showResignedProfile ? localizedString("Switch to Bundle Profile") : localizedString("Switch to Resigned Profile"),
                                           systemImage: showResignedProfile ? "circle" : "checkmark.circle.fill")
                                 }
                                 if let url = activeProfileURL {
@@ -190,10 +192,10 @@ struct AppInfoView: View {
                         } else {
                             HStack {
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text(showResignedProfile ? "No Resigned Profile Cached" : "No Bundle Profile Found")
+                                    Text(showResignedProfile ? localizedString("No Resigned Profile Cached") : localizedString("No Bundle Profile Found"))
                                         .font(.subheadline)
                                         .foregroundColor(.secondary)
-                                    Text("Tap toggle to view \(showResignedProfile ? "bundle" : "resigned") profile")
+                                    Text(showResignedProfile ? localizedString("Tap toggle to view bundle profile") : localizedString("Tap toggle to view resigned profile"))
                                         .font(.caption2)
                                         .foregroundColor(.secondary)
                                 }
@@ -210,7 +212,7 @@ struct AppInfoView: View {
                 // Info.plist Section
                 if resignedInfoPlistURL != nil || bundleInfoPlistURL != nil {
                     Section(header: HStack {
-                        Text(showResignedInfoPlist ? "Info.plist (Resigned)" : "Info.plist (Bundle)")
+                        Text(showResignedInfoPlist ? localizedString("Info.plist (Resigned)") : localizedString("Info.plist (Bundle)"))
                         Spacer()
                         SwiftUI.Button {
                             showResignedInfoPlist.toggle()
@@ -222,7 +224,7 @@ struct AppInfoView: View {
                         .buttonStyle(BorderlessButtonStyle())
                     }) {
                         if let plist = infoPlist {
-                            NavigationLink(destination: InfoPlistContainerView(plist: plist, title: showResignedInfoPlist ? "Info.plist (Resigned)" : "Info.plist (Bundle)", plistURL: activeInfoPlistURL)) {
+                            NavigationLink(destination: InfoPlistContainerView(plist: plist, title: showResignedInfoPlist ? "Info.plist (Resigned)" : "Info.plist (Bundle)", plistURL: activeInfoPlistURL).appLanguageEnvironment(rebuildsOnChange: false)) {
                                 Text("View Info.plist (\(plist.count) keys)")
                                     .font(.subheadline)
                             }
@@ -231,7 +233,7 @@ struct AppInfoView: View {
                                 SwiftUI.Button {
                                     showResignedInfoPlist.toggle()
                                 } label: {
-                                    Label(showResignedInfoPlist ? "Switch to Bundle Info.plist" : "Switch to Resigned Info.plist",
+                                    Label(showResignedInfoPlist ? localizedString("Switch to Bundle Info.plist") : localizedString("Switch to Resigned Info.plist"),
                                           systemImage: showResignedInfoPlist ? "circle" : "checkmark.circle.fill")
                                 }
                                 if let url = activeInfoPlistURL {
@@ -246,10 +248,10 @@ struct AppInfoView: View {
                         } else {
                             HStack {
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text(showResignedInfoPlist ? "No Resigned Info.plist Cached" : "No Bundle Info.plist Found")
+                                    Text(showResignedInfoPlist ? localizedString("No Resigned Info.plist Cached") : localizedString("No Bundle Info.plist Found"))
                                         .font(.subheadline)
                                         .foregroundColor(.secondary)
-                                    Text("Tap toggle to view \(showResignedInfoPlist ? "bundle" : "resigned") Info.plist")
+                                    Text(showResignedInfoPlist ? localizedString("Tap toggle to view bundle Info.plist") : localizedString("Tap toggle to view resigned Info.plist"))
                                         .font(.caption2)
                                         .foregroundColor(.secondary)
                                 }
@@ -267,7 +269,7 @@ struct AppInfoView: View {
                 if !installedApp.appExtensions.isEmpty {
                     Section(header: Text("App Extensions")) {
                         ForEach(Array(installedApp.appExtensions), id: \.bundleIdentifier) { ext in
-                            NavigationLink(destination: ExtensionInfoView(appExtension: ext, parentAppURL: appBundleURL, certificatesViewModel: certificatesViewModel)) {
+                            NavigationLink(destination: ExtensionInfoView(appExtension: ext, parentAppURL: appBundleURL, certificatesViewModel: certificatesViewModel).appLanguageEnvironment(rebuildsOnChange: false)) {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text(ext.name)
                                         .font(.subheadline)
@@ -282,7 +284,7 @@ struct AppInfoView: View {
 
                 // Resources Section
                 Section(header: Text("Resources")) {
-                    NavigationLink(destination: BundleResourceBrowserView(rootURL: appBundleURL, title: "Bundle Contents")) {
+                    NavigationLink(destination: BundleResourceBrowserView(rootURL: appBundleURL, title: "Bundle Contents").appLanguageEnvironment(rebuildsOnChange: false)) {
                         Text("Browse Bundle Contents")
                             .font(.subheadline)
                     }
@@ -293,7 +295,8 @@ struct AppInfoView: View {
             #else
             .listStyle(GroupedListStyle())
             #endif
-            .navigationTitle("App Details")
+            .appLocalizedNavigationTitle("App Details")
+            .appLanguageEnvironment()
             .navigationBarItems(trailing: SwiftUI.Button("Close") {
                 presentationMode.wrappedValue.dismiss()
             })
@@ -309,7 +312,7 @@ struct AppInfoView: View {
     }
     
     private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
+        let formatter = AppDateFormatter()
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
         return formatter.string(from: date)
@@ -359,7 +362,7 @@ struct ProvisioningProfileDetailView: View {
             if !profile.certificates.isEmpty {
                 Section(header: Text("Developer Certificates (\(profile.certificates.count))")) {
                     ForEach(profile.certificates, id: \.serialNumber) { cert in
-                        NavigationLink(destination: CertificateDetailView(certificate: cert, viewModel: certificatesViewModel)) {
+                        NavigationLink(destination: CertificateDetailView(certificate: cert, viewModel: certificatesViewModel).appLanguageEnvironment(rebuildsOnChange: false)) {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(cert.name)
                                     .font(.subheadline)
@@ -374,7 +377,7 @@ struct ProvisioningProfileDetailView: View {
             
             if !profile.deviceIDs.isEmpty {
                 Section(header: Text("Provisioned Devices (\(profile.deviceIDs.count))")) {
-                    NavigationLink(destination: DeviceIDsView(devices: profile.deviceIDs)) {
+                    NavigationLink(destination: DeviceIDsView(devices: profile.deviceIDs).appLanguageEnvironment(rebuildsOnChange: false)) {
                         Text("View Provisioned Devices")
                     }
                 }
@@ -406,12 +409,13 @@ struct ProvisioningProfileDetailView: View {
         #else
         .listStyle(GroupedListStyle())
         #endif
-        .navigationTitle("Profile Details")
+        .appLocalizedNavigationTitle("Profile Details")
+        .appLanguageEnvironment()
         .interactiveDismissDisabled(true)
     }
     
     private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
+        let formatter = AppDateFormatter()
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
         return formatter.string(from: date)
@@ -456,17 +460,19 @@ struct AppIconView: View {
 }
 
 struct InfoRow: View {
+    /// 언어가 바뀌면 body 를 다시 평가해 localized() 로 미리 계산한 문구도 새 언어로 갱신한다.
+    @ObservedObject var appLanguageObserver = LanguageManager.shared
     let label: String
     let value: String
     var valueColor: Color = .primary
     
     var body: some View {
         HStack {
-            Text(label)
+            Text(localizedString(label))
                 .font(.subheadline)
                 .foregroundColor(.secondary)
             Spacer()
-            Text(value)
+            Text(localizedString(value))
                 .font(.subheadline)
                 .foregroundColor(valueColor)
                 .multilineTextAlignment(.trailing)
@@ -475,17 +481,19 @@ struct InfoRow: View {
 }
 
 struct ProfileInfoRow: View {
+    /// 언어가 바뀌면 body 를 다시 평가해 localized() 로 미리 계산한 문구도 새 언어로 갱신한다.
+    @ObservedObject var appLanguageObserver = LanguageManager.shared
     let label: String
     let value: String
     var valueColor: Color = .primary
     
     var body: some View {
         HStack {
-            Text(label)
+            Text(localizedString(label))
                 .font(.subheadline)
                 .foregroundColor(.secondary)
             Spacer()
-            Text(value)
+            Text(localizedString(value))
                 .font(.subheadline)
                 .foregroundColor(valueColor)
                 .multilineTextAlignment(.trailing)
@@ -566,7 +574,8 @@ struct DeviceIDsView: View {
                 #endif
             }
         }
-        .navigationTitle("Device IDs")
+        .appLocalizedNavigationTitle("Device IDs")
+        .appLanguageEnvironment()
         .interactiveDismissDisabled(true)
     }
 }
@@ -574,6 +583,8 @@ struct DeviceIDsView: View {
 // MARK: - Extension Info View
 
 struct ExtensionInfoView: View {
+    /// 언어가 바뀌면 body 를 다시 평가해 localized() 로 미리 계산한 문구도 새 언어로 갱신한다.
+    @ObservedObject var appLanguageObserver = LanguageManager.shared
     let appExtension: InstalledExtension
     let parentAppURL: URL
     @ObservedObject var certificatesViewModel: CertificatesViewModel
@@ -686,7 +697,7 @@ struct ExtensionInfoView: View {
                 if let exec = plist?["CFBundleExecutable"] as? String, let extURL = extensionURL {
                     let execURL = extURL.appendingPathComponent(exec)
                     if FileManager.default.fileExists(atPath: execURL.path) && MachOParser.isMachOBinary(at: execURL) {
-                        NavigationLink(destination: MachOResourceViewer(url: execURL)) {
+                        NavigationLink(destination: MachOResourceViewer(url: execURL).appLanguageEnvironment(rebuildsOnChange: false)) {
                             HStack {
                                 Text("Executable")
                                     .font(.subheadline)
@@ -712,7 +723,7 @@ struct ExtensionInfoView: View {
             // Provisioning Profile
             if resignedProfileURL != nil || bundleProfileURL != nil {
                 Section(header: HStack {
-                    Text(showResignedProfile ? "Provisioning Profile (Resigned)" : "Provisioning Profile (Bundle)")
+                    Text(showResignedProfile ? localizedString("Provisioning Profile (Resigned)") : localizedString("Provisioning Profile (Bundle)"))
                     Spacer()
                     SwiftUI.Button {
                         showResignedProfile.toggle()
@@ -724,7 +735,7 @@ struct ExtensionInfoView: View {
                     .buttonStyle(BorderlessButtonStyle())
                 }) {
                     if let profile = provisioningProfile {
-                        NavigationLink(destination: ProvisioningProfileDetailView(profile: profile, profileURL: activeProfileURL, certificatesViewModel: certificatesViewModel)) {
+                        NavigationLink(destination: ProvisioningProfileDetailView(profile: profile, profileURL: activeProfileURL, certificatesViewModel: certificatesViewModel).appLanguageEnvironment(rebuildsOnChange: false)) {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(profile.name)
                                     .font(.subheadline)
@@ -741,7 +752,7 @@ struct ExtensionInfoView: View {
                             SwiftUI.Button {
                                 showResignedProfile.toggle()
                             } label: {
-                                Label(showResignedProfile ? "Switch to Bundle Profile" : "Switch to Resigned Profile",
+                                Label(showResignedProfile ? localizedString("Switch to Bundle Profile") : localizedString("Switch to Resigned Profile"),
                                       systemImage: showResignedProfile ? "circle" : "checkmark.circle.fill")
                             }
                             if let url = activeProfileURL {
@@ -756,10 +767,10 @@ struct ExtensionInfoView: View {
                     } else {
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(showResignedProfile ? "No Resigned Profile Cached" : "No Bundle Profile Found")
+                                Text(showResignedProfile ? localizedString("No Resigned Profile Cached") : localizedString("No Bundle Profile Found"))
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
-                                Text("Tap toggle to view \(showResignedProfile ? "bundle" : "resigned") profile")
+                                Text(showResignedProfile ? localizedString("Tap toggle to view bundle profile") : localizedString("Tap toggle to view resigned profile"))
                                     .font(.caption2)
                                     .foregroundColor(.secondary)
                             }
@@ -776,7 +787,7 @@ struct ExtensionInfoView: View {
             // Info.plist
             if resignedInfoPlistURL != nil || bundleInfoPlistURL != nil {
                 Section(header: HStack {
-                    Text(showResignedInfoPlist ? "Info.plist (Resigned)" : "Info.plist (Bundle)")
+                    Text(showResignedInfoPlist ? localizedString("Info.plist (Resigned)") : localizedString("Info.plist (Bundle)"))
                     Spacer()
                     SwiftUI.Button {
                         showResignedInfoPlist.toggle()
@@ -788,7 +799,7 @@ struct ExtensionInfoView: View {
                     .buttonStyle(BorderlessButtonStyle())
                 }) {
                     if let plist = infoPlist {
-                        NavigationLink(destination: InfoPlistContainerView(plist: plist, title: showResignedInfoPlist ? "Info.plist (Resigned)" : "Info.plist (Bundle)", plistURL: activeInfoPlistURL)) {
+                        NavigationLink(destination: InfoPlistContainerView(plist: plist, title: showResignedInfoPlist ? "Info.plist (Resigned)" : "Info.plist (Bundle)", plistURL: activeInfoPlistURL).appLanguageEnvironment(rebuildsOnChange: false)) {
                             Text("View Info.plist (\(plist.count) keys)")
                                 .font(.subheadline)
                         }
@@ -797,7 +808,7 @@ struct ExtensionInfoView: View {
                             SwiftUI.Button {
                                 showResignedInfoPlist.toggle()
                             } label: {
-                                Label(showResignedInfoPlist ? "Switch to Bundle Info.plist" : "Switch to Resigned Info.plist",
+                                Label(showResignedInfoPlist ? localizedString("Switch to Bundle Info.plist") : localizedString("Switch to Resigned Info.plist"),
                                       systemImage: showResignedInfoPlist ? "circle" : "checkmark.circle.fill")
                             }
                             if let url = activeInfoPlistURL {
@@ -812,10 +823,10 @@ struct ExtensionInfoView: View {
                     } else {
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(showResignedInfoPlist ? "No Resigned Info.plist Cached" : "No Bundle Info.plist Found")
+                                Text(showResignedInfoPlist ? localizedString("No Resigned Info.plist Cached") : localizedString("No Bundle Info.plist Found"))
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
-                                Text("Tap toggle to view \(showResignedInfoPlist ? "bundle" : "resigned") Info.plist")
+                                Text(showResignedInfoPlist ? localizedString("Tap toggle to view bundle Info.plist") : localizedString("Tap toggle to view resigned Info.plist"))
                                     .font(.caption2)
                                     .foregroundColor(.secondary)
                             }
@@ -838,7 +849,7 @@ struct ExtensionInfoView: View {
                             ?? subParser?.bundleName
                             ?? subURL.deletingPathExtension().lastPathComponent
                         let subBundleID = subParser?.bundleIdentifier ?? "Unknown"
-                        NavigationLink(destination: BundleInspectorView(bundleURL: subURL, certificatesViewModel: certificatesViewModel)) {
+                        NavigationLink(destination: BundleInspectorView(bundleURL: subURL, certificatesViewModel: certificatesViewModel).appLanguageEnvironment(rebuildsOnChange: false)) {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(subName)
                                     .font(.subheadline)
@@ -860,11 +871,12 @@ struct ExtensionInfoView: View {
         .listStyle(GroupedListStyle())
         #endif
         .navigationTitle(appExtension.name)
+        .appLanguageEnvironment()
         .interactiveDismissDisabled(true)
     }
 
     private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
+        let formatter = AppDateFormatter()
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
         return formatter.string(from: date)
@@ -924,7 +936,7 @@ struct BundleInspectorView: View {
                 if let execName = infoPlist?["CFBundleExecutable"] as? String {
                     let execURL = bundleURL.appendingPathComponent(execName)
                     if FileManager.default.fileExists(atPath: execURL.path) && MachOParser.isMachOBinary(at: execURL) {
-                        NavigationLink(destination: MachOResourceViewer(url: execURL)) {
+                        NavigationLink(destination: MachOResourceViewer(url: execURL).appLanguageEnvironment(rebuildsOnChange: false)) {
                             HStack {
                                 Text("Executable")
                                     .font(.subheadline)
@@ -946,7 +958,7 @@ struct BundleInspectorView: View {
 
             if let profile = provisioningProfile {
                 Section(header: Text("Provisioning Profile")) {
-                    NavigationLink(destination: ProvisioningProfileDetailView(profile: profile, profileURL: bundleURL.appendingPathComponent("embedded.mobileprovision"), certificatesViewModel: certificatesViewModel)) {
+                    NavigationLink(destination: ProvisioningProfileDetailView(profile: profile, profileURL: bundleURL.appendingPathComponent("embedded.mobileprovision"), certificatesViewModel: certificatesViewModel).appLanguageEnvironment(rebuildsOnChange: false)) {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(profile.name)
                                 .font(.subheadline)
@@ -963,7 +975,7 @@ struct BundleInspectorView: View {
 
             if let plist = infoPlist {
                 Section(header: Text("Info.plist")) {
-                    NavigationLink(destination: InfoPlistContainerView(plist: plist, plistURL: InfoPlistParser.resolveInfoPlistURL(for: bundleURL))) {
+                    NavigationLink(destination: InfoPlistContainerView(plist: plist, plistURL: InfoPlistParser.resolveInfoPlistURL(for: bundleURL)).appLanguageEnvironment(rebuildsOnChange: false)) {
                         Text("View Info.plist (\(plist.count) keys)")
                             .font(.subheadline)
                     }
@@ -978,7 +990,7 @@ struct BundleInspectorView: View {
                             ?? subParser?.bundleName
                             ?? subURL.deletingPathExtension().lastPathComponent
                         let subBundleID = subParser?.bundleIdentifier ?? "Unknown"
-                        NavigationLink(destination: BundleInspectorView(bundleURL: subURL, certificatesViewModel: certificatesViewModel)) {
+                        NavigationLink(destination: BundleInspectorView(bundleURL: subURL, certificatesViewModel: certificatesViewModel).appLanguageEnvironment(rebuildsOnChange: false)) {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(subName)
                                     .font(.subheadline)
@@ -993,7 +1005,7 @@ struct BundleInspectorView: View {
 
             // Resources
             Section(header: Text("Resources")) {
-                NavigationLink(destination: BundleResourceBrowserView(rootURL: bundleURL, title: "Bundle Contents")) {
+                NavigationLink(destination: BundleResourceBrowserView(rootURL: bundleURL, title: "Bundle Contents").appLanguageEnvironment(rebuildsOnChange: false)) {
                     Text("Browse Bundle Contents")
                         .font(.subheadline)
                 }
@@ -1006,11 +1018,12 @@ struct BundleInspectorView: View {
         .listStyle(GroupedListStyle())
         #endif
         .navigationTitle(displayName)
+        .appLanguageEnvironment()
         .interactiveDismissDisabled(true)
     }
 
     private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
+        let formatter = AppDateFormatter()
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
         return formatter.string(from: date)

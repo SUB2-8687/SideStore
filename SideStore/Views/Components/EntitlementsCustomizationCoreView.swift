@@ -16,6 +16,8 @@ public enum EntitlementsCustomizationStyle {
 }
 
 public struct EntitlementsCustomizationCoreView: View {
+    /// 언어가 바뀌면 body 를 다시 평가해 localized() 로 미리 계산한 문구도 새 언어로 갱신한다.
+    @ObservedObject var appLanguageObserver = LanguageManager.shared
     public let style: EntitlementsCustomizationStyle
     @StateObject private var viewModel: EntitlementsCustomizationViewModel
     @State private var expandedItemIDs: Set<String> = []
@@ -82,7 +84,7 @@ public struct EntitlementsCustomizationCoreView: View {
                     hideKeyboard()
                 }
             )
-            .navigationTitle("Customize Entitlements")
+            .appLocalizedNavigationTitle("Customize Entitlements")
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarItems(
                 leading: SwiftUI.Button("Cancel") {
@@ -207,7 +209,7 @@ public struct EntitlementsCustomizationCoreView: View {
         HStack(spacing: 6) {
             Image(systemName: viewModel.teamType == .free ? "person.crop.circle" : "star.circle.fill")
                 .font(.system(size: 11, weight: .semibold))
-            Text(viewModel.teamType == .free ? "Free Account" : "Paid Developer")
+            Text(viewModel.teamType == .free ? NSLocalizedString("Free Account", comment: "") : NSLocalizedString("Paid Developer", comment: ""))
                 .font(.system(size: 11, weight: .semibold))
         }
         .foregroundColor(viewModel.teamType == .free ? Color.orange : Color.green)
@@ -274,7 +276,7 @@ public struct EntitlementsCustomizationCoreView: View {
                                 .font(.system(size: 14, weight: .semibold))
                                 .foregroundColor(.primary)
 
-                            Text(viewModel.currentTarget?.isExtension == true ? "Extension" : "Main App")
+                            Text(viewModel.currentTarget?.isExtension == true ? NSLocalizedString("Extension", comment: "") : NSLocalizedString("Main App", comment: ""))
                                 .font(.system(size: 10, weight: .semibold))
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
@@ -677,7 +679,7 @@ public struct EntitlementsCustomizationCoreView: View {
                     }
                 }
             }
-            .navigationTitle("Add Entitlement")
+            .appLocalizedNavigationTitle("Add Entitlement")
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarItems(
                 leading: SwiftUI.Button("Cancel") {

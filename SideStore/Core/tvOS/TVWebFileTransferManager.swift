@@ -36,6 +36,7 @@ public final class TVWebFileTransferManager: @unchecked Sendable {
         completion: @escaping (URL?) -> Void
     ) {
         self.stop()
+        let title = NSLocalizedString(title, comment: "")
 
         var extensions = acceptedExtensions
         if let contentTypes = contentTypes {
@@ -60,7 +61,7 @@ public final class TVWebFileTransferManager: @unchecked Sendable {
         DispatchQueue.main.async{
             let alert = UIAlertController(
                 title: title,
-                message: NSLocalizedString("Open this URL on your iPhone, iPad, or Mac on the same Wi-Fi network to upload:\n\n\(serverURL)", comment: ""),
+                message: String(format: NSLocalizedString("Open this URL on your iPhone, iPad, or Mac on the same Wi-Fi network to upload:\n\n%@", comment: ""), serverURL),
                 preferredStyle: .alert
             )
             alert.addAction(UIAlertAction(title: NSLocalizedString("Cancel", comment: ""), style: .cancel) { [weak self] _ in
@@ -80,6 +81,7 @@ public final class TVWebFileTransferManager: @unchecked Sendable {
         completion: (() -> Void)? = nil
     ) {
         self.stop()
+        let title = NSLocalizedString(title, comment: "")
         self.currentMode = .export(fileURL: fileURL, title: title, completion: completion)
 
         guard let serverURL = self.startListener() else {
@@ -91,7 +93,7 @@ public final class TVWebFileTransferManager: @unchecked Sendable {
         DispatchQueue.main.async {
             let alert = UIAlertController(
                 title: title,
-                message: NSLocalizedString("Open this URL on your iPhone, iPad, or Mac on the same Wi-Fi network to download '\(fileURL.lastPathComponent)':\n\n\(serverURL)", comment: ""),
+                message: String(format: NSLocalizedString("Open this URL on your iPhone, iPad, or Mac on the same Wi-Fi network to download '%@':\n\n%@", comment: ""), fileURL.lastPathComponent, serverURL),
                 preferredStyle: .alert
             )
             alert.addAction(UIAlertAction(title: NSLocalizedString("Done", comment: ""), style: .default) { [weak self] _ in

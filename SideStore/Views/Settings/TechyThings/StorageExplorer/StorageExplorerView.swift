@@ -12,6 +12,8 @@ import Combine
 // MARK: - Root Storage Explorer View
 
 public struct StorageExplorerView: View {
+    /// 언어가 바뀌면 body 를 다시 평가해 localized() 로 미리 계산한 문구도 새 언어로 갱신한다.
+    @ObservedObject var appLanguageObserver = LanguageManager.shared
     private static var hasCompletedInitialStatsScan: Bool = false
     private static var cachedAppStorageUsed: String = ""
     private static var cachedFreeSpace: String = ""
@@ -42,7 +44,7 @@ public struct StorageExplorerView: View {
             Section(
                 header: Text("App Storage Containers"),
                 footer: StorageExplorerFooterView(
-                    appStorageUsedString: appStorageUsedString.isEmpty ? "Calculating..." : appStorageUsedString,
+                    appStorageUsedString: appStorageUsedString.isEmpty ? NSLocalizedString("Calculating…", comment: "") : appStorageUsedString,
                     freeHardwareSpaceString: freeHardwareSpaceString,
                     totalHardwareSpaceString: totalHardwareSpaceString
                 )
@@ -58,7 +60,7 @@ public struct StorageExplorerView: View {
         #else
         .listStyle(.grouped)
         #endif
-        .navigationTitle("Storage Explorer")
+        .appLocalizedNavigationTitle("Storage Explorer")
         .onAppear {
             verboseLog("[StorageExplorerView] onAppear triggered")
             self.loadLocations()
@@ -88,7 +90,7 @@ public struct StorageExplorerView: View {
             // 1. Private Documents
             if let docsURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first {
                 locs.append(StorageLocation(
-                    name: "Private Documents",
+                    name: NSLocalizedString("Private Documents", comment: ""),
                     subtitle: docsURL.path,
                     iconName: "folder.badge.gearshape",
                     url: docsURL
@@ -102,7 +104,7 @@ public struct StorageExplorerView: View {
                    !seenGroupPaths.contains(groupURL.path) {
                     seenGroupPaths.insert(groupURL.path)
                     locs.append(StorageLocation(
-                        name: "App Group Container (\(groupID))",
+                        name: String(format: NSLocalizedString("App Group Container (%@)", comment: ""), groupID),
                         subtitle: groupURL.path,
                         iconName: "shippingbox",
                         url: groupURL
@@ -113,7 +115,7 @@ public struct StorageExplorerView: View {
             // 3. App Backups Directory
             if let backupsURL = fileManager.appBackupsDirectory {
                 locs.append(StorageLocation(
-                    name: "App Backups Directory",
+                    name: NSLocalizedString("App Backups Directory", comment: ""),
                     subtitle: backupsURL.path,
                     iconName: "archivebox",
                     url: backupsURL
@@ -123,7 +125,7 @@ public struct StorageExplorerView: View {
             // 4. Temporary Directory
             let tmpURL = fileManager.temporaryDirectory
             locs.append(StorageLocation(
-                name: "Temporary Directory (tmp)",
+                name: NSLocalizedString("Temporary Directory (tmp)", comment: ""),
                 subtitle: tmpURL.path,
                 iconName: "trash.circle",
                 url: tmpURL
@@ -194,27 +196,27 @@ public struct StorageExplorerView: View {
             do {
                 let values = try fileManager.temporaryDirectory.resourceValues(forKeys: [.volumeTotalCapacityKey, .volumeAvailableCapacityForImportantUsageKey, .volumeAvailableCapacityKey])
                 if let total = values.volumeTotalCapacity {
-                    hwTotalStr = ByteCountFormatter.string(fromByteCount: Int64(total), countStyle: .file)
+                    hwTotalStr = AppFormat.bytes(Int64(total))
                 }
                 if let free = values.volumeAvailableCapacityForImportantUsage {
-                    hwFreeStr = ByteCountFormatter.string(fromByteCount: free, countStyle: .file)
+                    hwFreeStr = AppFormat.bytes(free)
                 } else if let free = values.volumeAvailableCapacity {
-                    hwFreeStr = ByteCountFormatter.string(fromByteCount: Int64(free), countStyle: .file)
+                    hwFreeStr = AppFormat.bytes(Int64(free))
                 }
             } catch {}
             #else
             do {
                 let values = try fileManager.temporaryDirectory.resourceValues(forKeys: [.volumeTotalCapacityKey, .volumeAvailableCapacityKey])
                 if let total = values.volumeTotalCapacity {
-                    hwTotalStr = ByteCountFormatter.string(fromByteCount: Int64(total), countStyle: .file)
+                    hwTotalStr = AppFormat.bytes(Int64(total))
                 }
                 if let free = values.volumeAvailableCapacity {
-                    hwFreeStr = ByteCountFormatter.string(fromByteCount: Int64(free), countStyle: .file)
+                    hwFreeStr = AppFormat.bytes(Int64(free))
                 }
             } catch {}
             #endif
             
-            let appSizeStr = ByteCountFormatter.string(fromByteCount: totalAppSize, countStyle: .file)
+            let appSizeStr = AppFormat.bytes(totalAppSize)
             verboseLog("[StorageExplorerView] statsTask completed successfully. totalAppSize: \(appSizeStr), freeSpace: \(hwFreeStr)")
             
             if Task.isCancelled { return }

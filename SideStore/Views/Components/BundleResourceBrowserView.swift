@@ -27,6 +27,8 @@ struct BundleItem: Identifiable {
 // MARK: - Bundle Resource Browser View
 
 struct BundleResourceBrowserView: View {
+    /// 언어가 바뀌면 body 를 다시 평가해 localized() 로 미리 계산한 문구도 새 언어로 갱신한다.
+    @ObservedObject var appLanguageObserver = LanguageManager.shared
     let rootURL: URL
     let title: String
 
@@ -45,7 +47,7 @@ struct BundleResourceBrowserView: View {
     var body: some View {
         List {
             if filteredItems.isEmpty {
-                Text(items.isEmpty ? "Empty directory" : "No results")
+                Text(items.isEmpty ? NSLocalizedString("Empty directory", comment: "") : NSLocalizedString("No results", comment: ""))
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             } else {
@@ -72,13 +74,13 @@ struct BundleResourceBrowserView: View {
         .listStyle(GroupedListStyle())
         #endif
         .navigationTitle(isSelecting
-            ? (selectedURLs.isEmpty ? "Select Files" : "\(selectedURLs.count) selected")
+            ? (selectedURLs.isEmpty ? NSLocalizedString("Select Files", comment: "") : String(format: NSLocalizedString("%d selected", comment: ""), selectedURLs.count))
             : title)
         .searchable(text: $searchQuery, prompt: "Search files")
         .toolbar {
             // Trailing: Select / Done
             ToolbarItem(placement: .navigationBarTrailing) {
-                SwiftUI.Button(isSelecting ? "Done" : "Select") {
+                SwiftUI.Button(isSelecting ? NSLocalizedString("Done", comment: "") : NSLocalizedString("Select", comment: "")) {
                     withAnimation {
                         isSelecting.toggle()
                         if !isSelecting { selectedURLs.removeAll() }
@@ -152,7 +154,7 @@ struct BundleItemRow: View {
             }
             .buttonStyle(.plain)
         } else {
-            NavigationLink(destination: destination) {
+            NavigationLink(destination: destination.appLanguageEnvironment(rebuildsOnChange: false)) {
                 rowContent(selected: false)
             }
         }
@@ -472,7 +474,7 @@ struct FullAppBundleView: View {
                 if let exec = plist?["CFBundleExecutable"] as? String {
                     let execURL = bundleURL.appendingPathComponent(exec)
                     if FileManager.default.fileExists(atPath: execURL.path) && CodeSignKit.MachOParser.isMachOBinary(at: execURL) {
-                        NavigationLink(destination: MachOResourceViewer(url: execURL)) {
+                        NavigationLink(destination: MachOResourceViewer(url: execURL).appLanguageEnvironment(rebuildsOnChange: false)) {
                             HStack {
                                 Text("Executable")
                                     .font(.subheadline)
@@ -492,7 +494,7 @@ struct FullAppBundleView: View {
             // Provisioning Profile — from embedded.mobileprovision
             if let profile = provisioningProfile {
                 Section(header: Text("Provisioning Profile")) {
-                    NavigationLink(destination: ProvisioningProfileDetailView(profile: profile, certificatesViewModel: certificatesViewModel)) {
+                    NavigationLink(destination: ProvisioningProfileDetailView(profile: profile, certificatesViewModel: certificatesViewModel).appLanguageEnvironment(rebuildsOnChange: false)) {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(profile.name)
                                 .font(.subheadline)
@@ -510,7 +512,7 @@ struct FullAppBundleView: View {
             // Info.plist
             if let plist = infoPlist {
                 Section(header: Text("Info.plist")) {
-                    NavigationLink(destination: InfoPlistContainerView(plist: plist)) {
+                    NavigationLink(destination: InfoPlistContainerView(plist: plist).appLanguageEnvironment(rebuildsOnChange: false)) {
                         Text("View Info.plist (\(plist.count) keys)")
                             .font(.subheadline)
                     }
@@ -526,7 +528,7 @@ struct FullAppBundleView: View {
                             ?? extParser?.bundleName
                             ?? extURL.deletingPathExtension().lastPathComponent
                         let extBundleID = extParser?.bundleIdentifier ?? "Unknown"
-                        NavigationLink(destination: BundleInspectorView(bundleURL: extURL, certificatesViewModel: certificatesViewModel)) {
+                        NavigationLink(destination: BundleInspectorView(bundleURL: extURL, certificatesViewModel: certificatesViewModel).appLanguageEnvironment(rebuildsOnChange: false)) {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(extName)
                                     .font(.subheadline)
@@ -541,7 +543,7 @@ struct FullAppBundleView: View {
 
             // Resources — recursive browser
             Section(header: Text("Resources")) {
-                NavigationLink(destination: BundleResourceBrowserView(rootURL: bundleURL, title: "Bundle Contents")) {
+                NavigationLink(destination: BundleResourceBrowserView(rootURL: bundleURL, title: "Bundle Contents").appLanguageEnvironment(rebuildsOnChange: false)) {
                     Text("Browse Bundle Contents")
                         .font(.subheadline)
                 }
@@ -558,7 +560,7 @@ struct FullAppBundleView: View {
     }
 
     private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
+        let formatter = AppDateFormatter()
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
         return formatter.string(from: date)
@@ -567,6 +569,8 @@ struct FullAppBundleView: View {
 
 // MARK: - Plist Resource Viewer 
 struct PlistResourceViewer: View {
+    /// 언어가 바뀌면 body 를 다시 평가해 localized() 로 미리 계산한 문구도 새 언어로 갱신한다.
+    @ObservedObject var appLanguageObserver = LanguageManager.shared
     let url: URL
 
     @State private var plistDict: [String: any Sendable]? = nil
@@ -579,7 +583,7 @@ struct PlistResourceViewer: View {
                 InfoPlistContainerView(plist: dict, title: url.lastPathComponent)
             } else {
                 ScrollView {
-                    Text(rawText.isEmpty ? "Loading..." : rawText)
+                    Text(rawText.isEmpty ? NSLocalizedString("Loading...", comment: "") : rawText)
                         .font(.system(size: 12, design: .monospaced))
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding()
@@ -641,6 +645,8 @@ struct ResourceImageViewer: View {
 // MARK: - Resource Text Viewer
 
 struct ResourceTextViewer: View {
+    /// 언어가 바뀌면 body 를 다시 평가해 localized() 로 미리 계산한 문구도 새 언어로 갱신한다.
+    @ObservedObject var appLanguageObserver = LanguageManager.shared
     var url: URL? = nil
     var title: String? = nil
     var explicitContent: String? = nil
@@ -651,7 +657,7 @@ struct ResourceTextViewer: View {
 
     var body: some View {
         ScrollView {
-            Text(content.isEmpty ? "Loading..." : content)
+            Text(content.isEmpty ? NSLocalizedString("Loading...", comment: "") : content)
                 .font(.system(size: 12, design: .monospaced))
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding()

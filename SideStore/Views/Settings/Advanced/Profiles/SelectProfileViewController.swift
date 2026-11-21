@@ -25,7 +25,7 @@ struct ProfileRowItemView: View {
     }
 
     private var expirationString: String {
-        let formatter = DateFormatter()
+        let formatter = AppDateFormatter()
         formatter.dateStyle = .short
         formatter.timeStyle = .none
         return formatter.string(from: profile.expirationDate)
@@ -195,10 +195,14 @@ final class SelectProfileViewController: UITableViewController {
         if #available(iOS 16.0, tvOS 16.0, *) {
             cell.contentConfiguration = UIHostingConfiguration {
                 ProfileRowItemView(profile: profile, isCurrent: isCurrent, matchingCert: matchingCert)
+                    .appLanguageEnvironment()
             }
         } else {
             cell.textLabel?.numberOfLines = 0
-            cell.textLabel?.text = "\(profile.name)\(isCurrent ? " (Current)" : "")\nBundle ID: \(profile.bundleIdentifier)\nExpires: \(profile.expirationDate)"
+            let currentSuffix = isCurrent ? " " + NSLocalizedString("(Current)", comment: "") : ""
+            let bundleLine = String(format: NSLocalizedString("Bundle ID: %@", comment: ""), profile.bundleIdentifier)
+            let expiresLine = String(format: NSLocalizedString("Expires: %@", comment: ""), "\(profile.expirationDate)")
+            cell.textLabel?.text = "\(profile.name)\(currentSuffix)\n\(bundleLine)\n\(expiresLine)"
             cell.accessoryType = isCurrent ? .checkmark : .none
         }
 

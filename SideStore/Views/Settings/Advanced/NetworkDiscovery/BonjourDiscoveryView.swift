@@ -14,6 +14,7 @@ import Network
 // Entry point: discovers and lists browsable Bonjour domains.
 // Tapping a domain navigates to its service types.
 struct BonjourDiscoveryView: View {
+    @ObservedObject private var languageManager = LanguageManager.shared
     @StateObject private var viewModel = BonjourDiscoveryViewModel()
     @State private var selectedDomain: String? = nil
     @State private var isAutoRefreshEnabled = true
@@ -33,14 +34,14 @@ struct BonjourDiscoveryView: View {
             #endif
             
             if viewModel.isSearching && viewModel.domains.isEmpty {
-                ProgressView("Searching for domains…")
+                ProgressView(localized("Searching for domains…"))
             } else if !viewModel.isSearching && viewModel.domains.isEmpty {
                 emptyState
             } else {
                 domainsList
             }
         }
-        .navigationTitle("Discovery")
+        .appLocalizedNavigationTitle("Discovery")
         #if !os(tvOS)
         .navigationBarTitleDisplayMode(.inline)
         #endif
@@ -100,10 +101,10 @@ struct BonjourDiscoveryView: View {
                     Image(systemName: "line.3.horizontal.decrease.circle")
                 }
                 .confirmationDialog("Filter & Sort", isPresented: $showFilterDialog) {
-                    SwiftUI.Button(viewModel.domainGroupByFirstLetter ? "Group: None" : "Group: First Letter") {
+                    SwiftUI.Button(viewModel.domainGroupByFirstLetter ? NSLocalizedString("Group: None", comment: "") : NSLocalizedString("Group: First Letter", comment: "")) {
                         viewModel.domainGroupByFirstLetter.toggle()
                     }
-                    SwiftUI.Button(viewModel.domainSortAscending ? "Sort: Name (Z to A)" : "Sort: Name (A to Z)") {
+                    SwiftUI.Button(viewModel.domainSortAscending ? NSLocalizedString("Sort: Name (Z to A)", comment: "") : NSLocalizedString("Sort: Name (A to Z)", comment: "")) {
                         viewModel.domainSortAscending.toggle()
                     }
                 }
@@ -183,7 +184,9 @@ struct BonjourDiscoveryView: View {
                     ForEach(section.items, id: \.self) { domain in
                         NavigationLink {
                             ServiceTypesView(domain: domain, viewModel: viewModel)
-                        } label: {
+                        
+.appLanguageEnvironment(rebuildsOnChange: false)
+} label: {
                             HStack {
                                 Image(systemName: "globe")
                                     .foregroundColor(.accentColor)
@@ -214,6 +217,7 @@ struct BonjourDiscoveryView: View {
 // Lists all service types discovered in a given domain.
 // Tapping a type navigates to its instances.
 struct ServiceTypesView: View {
+    @ObservedObject private var languageManager = LanguageManager.shared
     let domain: String
     @ObservedObject var viewModel: BonjourDiscoveryViewModel
     @State private var selectedType: String? = nil
@@ -235,7 +239,7 @@ struct ServiceTypesView: View {
             #endif
             
             if viewModel.isSearching && viewModel.serviceTypes.isEmpty {
-                ProgressView("Searching for service types…")
+                ProgressView(localized("Searching for service types…"))
             } else if !viewModel.isSearching && viewModel.serviceTypes.isEmpty {
                 emptyState
             } else {
@@ -268,7 +272,7 @@ struct ServiceTypesView: View {
                             SwiftUI.Button {
                                 viewModel.serviceTypeGroupOption = opt
                             } label: {
-                                Label(opt.rawValue, systemImage: viewModel.serviceTypeGroupOption == opt ? "checkmark" : "")
+                                Label(NSLocalizedString(opt.rawValue, comment: ""), systemImage: viewModel.serviceTypeGroupOption == opt ? "checkmark" : "")
                             }
                         }
                     } label: {
@@ -280,7 +284,7 @@ struct ServiceTypesView: View {
                             SwiftUI.Button {
                                 viewModel.serviceTypeSortOption = opt
                             } label: {
-                                Label(opt.rawValue, systemImage: viewModel.serviceTypeSortOption == opt ? "checkmark" : "")
+                                Label(NSLocalizedString(opt.rawValue, comment: ""), systemImage: viewModel.serviceTypeSortOption == opt ? "checkmark" : "")
                             }
                         }
                     } label: {
@@ -297,7 +301,7 @@ struct ServiceTypesView: View {
                 }
                 .confirmationDialog("Group By", isPresented: $showGroupDialog) {
                     ForEach(ServiceTypeGroupOption.allCases, id: \.self) { opt in
-                        SwiftUI.Button(opt.rawValue) {
+                        SwiftUI.Button(NSLocalizedString(opt.rawValue, comment: "")) {
                             viewModel.serviceTypeGroupOption = opt
                         }
                     }
@@ -310,7 +314,7 @@ struct ServiceTypesView: View {
                 }
                 .confirmationDialog("Sort By", isPresented: $showSortDialog) {
                     ForEach(ServiceTypeSortOption.allCases, id: \.self) { opt in
-                        SwiftUI.Button(opt.rawValue) {
+                        SwiftUI.Button(NSLocalizedString(opt.rawValue, comment: "")) {
                             viewModel.serviceTypeSortOption = opt
                         }
                     }
@@ -399,7 +403,9 @@ struct ServiceTypesView: View {
                                 friendlyName: typeInfo.friendlyName,
                                 viewModel: viewModel
                             )
-                        } label: {
+                        
+.appLanguageEnvironment(rebuildsOnChange: false)
+} label: {
                             HStack(spacing: 12) {
                                 Image(systemName: typeInfo.friendlyName != nil ? "checkmark.seal.fill" : "questionmark.circle")
                                     .foregroundColor(typeInfo.friendlyName != nil ? .green : .orange)
@@ -444,7 +450,7 @@ struct ServiceTypesView: View {
             HStack(spacing: 8) {
                 ProgressView()
                     .scaleEffect(0.8)
-                Text("Searching…")
+                Text(verbatim: localized("Searching…"))
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -458,6 +464,7 @@ struct ServiceTypesView: View {
 // Lists all discovered instances of a specific service type.
 // Tapping an instance navigates to its resolved details.
 struct ServiceInstancesView: View {
+    @ObservedObject private var languageManager = LanguageManager.shared
     let serviceType: String
     let domain: String
     let friendlyName: String?
@@ -481,7 +488,7 @@ struct ServiceInstancesView: View {
             #endif
             
             if viewModel.isSearching && viewModel.instances.isEmpty {
-                ProgressView("Searching for instances…")
+                ProgressView(localized("Searching for instances…"))
             } else if !viewModel.isSearching && viewModel.instances.isEmpty {
                 emptyState
             } else {
@@ -514,7 +521,7 @@ struct ServiceInstancesView: View {
                             SwiftUI.Button {
                                 viewModel.instanceGroupOption = opt
                             } label: {
-                                Label(opt.rawValue, systemImage: viewModel.instanceGroupOption == opt ? "checkmark" : "")
+                                Label(NSLocalizedString(opt.rawValue, comment: ""), systemImage: viewModel.instanceGroupOption == opt ? "checkmark" : "")
                             }
                         }
                     } label: {
@@ -526,7 +533,7 @@ struct ServiceInstancesView: View {
                             SwiftUI.Button {
                                 viewModel.instanceSortOption = opt
                             } label: {
-                                Label(opt.rawValue, systemImage: viewModel.instanceSortOption == opt ? "checkmark" : "")
+                                Label(NSLocalizedString(opt.rawValue, comment: ""), systemImage: viewModel.instanceSortOption == opt ? "checkmark" : "")
                             }
                         }
                     } label: {
@@ -543,7 +550,7 @@ struct ServiceInstancesView: View {
                 }
                 .confirmationDialog("Group By", isPresented: $showGroupDialog) {
                     ForEach(ServiceInstanceGroupOption.allCases, id: \.self) { opt in
-                        SwiftUI.Button(opt.rawValue) {
+                        SwiftUI.Button(NSLocalizedString(opt.rawValue, comment: "")) {
                             viewModel.instanceGroupOption = opt
                         }
                     }
@@ -556,7 +563,7 @@ struct ServiceInstancesView: View {
                 }
                 .confirmationDialog("Sort By", isPresented: $showSortDialog) {
                     ForEach(ServiceInstanceSortOption.allCases, id: \.self) { opt in
-                        SwiftUI.Button(opt.rawValue) {
+                        SwiftUI.Button(NSLocalizedString(opt.rawValue, comment: "")) {
                             viewModel.instanceSortOption = opt
                         }
                     }
@@ -640,7 +647,9 @@ struct ServiceInstancesView: View {
                     ForEach(section.items) { instance in
                         NavigationLink {
                             ServiceDetailView(service: instance, viewModel: viewModel, autoRefreshEnabled: isAutoRefreshEnabled)
-                        } label: {
+                        
+.appLanguageEnvironment(rebuildsOnChange: false)
+} label: {
                             HStack(spacing: 12) {
                                 Image(systemName: "desktopcomputer")
                                     .foregroundColor(.accentColor)
@@ -673,7 +682,7 @@ struct ServiceInstancesView: View {
             HStack(spacing: 8) {
                 ProgressView()
                     .scaleEffect(0.8)
-                Text("Searching…")
+                Text(verbatim: localized("Searching…"))
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -686,6 +695,8 @@ struct ServiceInstancesView: View {
 
 // Shows full resolved details of a service: hostname, port, IP addresses, TXT records.
 struct ServiceDetailView: View {
+    /// 언어가 바뀌면 body 를 다시 평가해 localized() 로 미리 계산한 문구도 새 언어로 갱신한다.
+    @ObservedObject var appLanguageObserver = LanguageManager.shared
     let service: DiscoveredService
     @ObservedObject var viewModel: BonjourDiscoveryViewModel
     let autoRefreshEnabled: Bool
@@ -719,7 +730,7 @@ struct ServiceDetailView: View {
                 loadingState
             }
         }
-        .navigationTitle("Service Details")
+        .appLocalizedNavigationTitle("Service Details")
         #if !os(tvOS)
         .navigationBarTitleDisplayMode(.inline)
         #endif
@@ -875,7 +886,7 @@ struct ServiceDetailView: View {
                     }
                     
                     HStack(spacing: 8) {
-                        Text(resolved.type.contains("_tcp") ? "TCP" : "UDP")
+                        Text(resolved.type.contains("_tcp") ? NSLocalizedString("TCP", comment: "") : NSLocalizedString("UDP", comment: ""))
                             .font(.system(size: 11, weight: .bold, design: .rounded))
                             .foregroundColor(.white)
                             .padding(.horizontal, 8)
@@ -916,7 +927,7 @@ struct ServiceDetailView: View {
             
             // Interfaces
             if !service.interfaces.isEmpty {
-                Section(header: Text("Discovered Interfaces (\(service.interfaces.count))")) {
+                Section(header: Text(String(format: NSLocalizedString("Discovered Interfaces (%d)", comment: ""), service.interfaces.count))) {
                     ForEach(service.interfaces, id: \.index) { iface in
                         HStack {
                             Image(systemName: iconForInterfaceType(iface.type))
@@ -964,7 +975,7 @@ struct ServiceDetailView: View {
             
             // TXT Records
             if !resolved.txtRecords.isEmpty {
-                Section(header: Text("TXT Record (\(resolved.txtRecords.count))")) {
+                Section(header: Text(String(format: NSLocalizedString("TXT Record (%d)", comment: ""), resolved.txtRecords.count))) {
                     ForEach(resolved.txtRecords, id: \.key) { record in
                         VStack(alignment: .leading, spacing: 4) {
                             Text(record.key)
@@ -1019,7 +1030,7 @@ struct ServiceDetailView: View {
                         SwiftUI.Button {
                             copyWithFeedback(rec.content)
                         } label: {
-                            Label("Copy \(rec.recordType) Record", systemImage: "doc.on.doc")
+                            Label(String(format: NSLocalizedString("Copy %@ Record", comment: ""), rec.recordType), systemImage: "doc.on.doc")
                         }
                     }
                 }
@@ -1035,7 +1046,7 @@ struct ServiceDetailView: View {
                     let scheme = resolved.type.contains("_https") || resolved.port == 443 ? "https" : "http"
                     if let url = URL(string: "\(scheme)://\(resolved.hostname):\(resolved.port)") {
                         Link(destination: url) {
-                            Label("Open in Safari (\(scheme)://)", systemImage: "safari")
+                            Label(String(format: NSLocalizedString("Open in Safari (%@://)", comment: ""), scheme), systemImage: "safari")
                         }
                     }
                 }
@@ -1112,6 +1123,8 @@ struct ServiceDetailView: View {
 
 // A simple key-value row with tap-to-copy and context menu
 private struct DetailRow: View {
+    /// 언어가 바뀌면 body 를 다시 평가해 localized() 로 미리 계산한 문구도 새 언어로 갱신한다.
+    @ObservedObject var appLanguageObserver = LanguageManager.shared
     let label: String
     let value: String
     var tag: String? = nil
@@ -1120,7 +1133,7 @@ private struct DetailRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
             HStack(spacing: 6) {
-                Text(label)
+                Text(NSLocalizedString(label, comment: ""))
                     .font(.caption)
                     .foregroundColor(.secondary)
                 if let tag = tag, !tag.isEmpty {
@@ -1152,7 +1165,7 @@ private struct DetailRow: View {
             SwiftUI.Button {
                 onCopy?(value)
             } label: {
-                Label("Copy \(label)", systemImage: "doc.on.doc")
+                Label(String(format: NSLocalizedString("Copy %@", comment: ""), label), systemImage: "doc.on.doc")
             }
         }
     }

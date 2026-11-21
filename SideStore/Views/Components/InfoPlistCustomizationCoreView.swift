@@ -36,6 +36,8 @@ public struct InfoPlistTarget: Identifiable, Sendable {
 }
 
 public struct InfoPlistCustomizationCoreView: View {
+    /// 언어가 바뀌면 body 를 다시 평가해 localized() 로 미리 계산한 문구도 새 언어로 갱신한다.
+    @ObservedObject var appLanguageObserver = LanguageManager.shared
     public let style: InfoPlistCustomizationStyle
     public let targets: [InfoPlistTarget]
     public let initialBundleID: String
@@ -273,7 +275,7 @@ public struct InfoPlistCustomizationCoreView: View {
                     hideKeyboard()
                 }
             )
-            .navigationTitle("Customize Info.plist")
+            .appLocalizedNavigationTitle("Customize Info.plist")
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarItems(
                 leading: SwiftUI.Button("Cancel") {
@@ -386,7 +388,7 @@ public struct InfoPlistCustomizationCoreView: View {
                                 .font(.system(size: 14, weight: .semibold))
                                 .foregroundColor(.primary)
 
-                            Text(currentTarget.isExtension ? "Extension" : "Main App")
+                            Text(currentTarget.isExtension ? NSLocalizedString("Extension", comment: "") : NSLocalizedString("Main App", comment: ""))
                                 .font(.system(size: 10, weight: .semibold))
                                 .padding(.horizontal, 6)
                                 .padding(.vertical, 2)
@@ -729,7 +731,7 @@ public struct InfoPlistCustomizationCoreView: View {
                     }
                 }) {
                     HStack(spacing: 4) {
-                        Text(isShowingRawKeys ? "Collapse" : "Expand (\(rawEntries.count))")
+                        Text(isShowingRawKeys ? NSLocalizedString("Collapse", comment: "") : String(format: NSLocalizedString("Expand (%lld)", comment: ""), rawEntries.count))
                             .font(.system(size: 13, weight: .medium))
                         Image(systemName: isShowingRawKeys ? "chevron.up" : "chevron.down")
                             .font(.system(size: 11, weight: .semibold))
@@ -820,7 +822,7 @@ public struct InfoPlistCustomizationCoreView: View {
                         }
                     }
                 Spacer()
-                Text(item.type.rawValue)
+                Text(NSLocalizedString(item.type.rawValue, comment: ""))
                     .font(.system(size: 10, weight: .semibold))
                     .padding(.horizontal, 6)
                     .padding(.vertical, 2)
@@ -904,7 +906,7 @@ public struct InfoPlistCustomizationCoreView: View {
                 Section(header: Text("Value Type")) {
                     Picker("Type", selection: $newKeyType) {
                         ForEach(RawPlistType.allCases) { type in
-                            Text(type.rawValue).tag(type)
+                            Text(NSLocalizedString(type.rawValue, comment: "")).tag(type)
                         }
                     }
                     .pickerStyle(.segmented)
@@ -923,7 +925,7 @@ public struct InfoPlistCustomizationCoreView: View {
                     }
                 }
             }
-            .navigationTitle("Add Plist Key")
+            .appLocalizedNavigationTitle("Add Plist Key")
             .navigationBarItems(
                 leading: SwiftUI.Button("Cancel") {
                     newKeyName = ""
@@ -949,7 +951,7 @@ public struct InfoPlistCustomizationCoreView: View {
         HStack(spacing: 5) {
             Image(systemName: icon)
                 .font(.system(size: 11, weight: .semibold))
-            Text(title)
+            Text(NSLocalizedString(title, comment: ""))
                 .font(.caption)
                 .fontWeight(.semibold)
         }

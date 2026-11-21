@@ -425,7 +425,7 @@ class SignInFlowHandler: AnyObject, SignInHandler, AnisetteServerHandler {
 
         for phone in phoneNumbers {
             let isCurrent = (phone.id == activeID)
-            let buttonTitle = isCurrent ? "\(phone.number) (Current)" : phone.number
+            let buttonTitle = isCurrent ? "\(phone.number) " + NSLocalizedString("(Current)", comment: "") : phone.number
             let action = UIAlertAction(title: buttonTitle, style: .default) { _ in
                 if case .voice = mode {
                     return continuation.resume(returning: .requestVoice(phoneID: phone.id))
@@ -482,9 +482,9 @@ class SignInFlowHandler: AnyObject, SignInHandler, AnisetteServerHandler {
             let initialCount = revokeVC.getSelectedCertificates().count
             let initialTitle: String
             if isPaid {
-                initialTitle = (initialCount == 0) ? "Continue Without Revoking" : "Revoke Selected (\(initialCount))"
+                initialTitle = (initialCount == 0) ? NSLocalizedString("Continue Without Revoking", comment: "") : String(format: NSLocalizedString("Revoke Selected (%d)", comment: ""), initialCount)
             } else {
-                initialTitle = "Revoke"
+                initialTitle = NSLocalizedString("Revoke", comment: "")
             }
             let actionStyle: UIAlertAction.Style = (isPaid && initialCount == 0) ? .default : .destructive
             let revokeAction = UIAlertAction(title: initialTitle, style: actionStyle) { _ in
@@ -501,7 +501,7 @@ class SignInFlowHandler: AnyObject, SignInHandler, AnisetteServerHandler {
                         revokeAction.setValue(NSLocalizedString("Continue Without Revoking", comment: ""), forKey: "title")
                         revokeAction.setValue(nil, forKey: "titleTextColor")
                     } else {
-                        revokeAction.setValue("Revoke Selected (\(selected.count))", forKey: "title")
+                        revokeAction.setValue(String(format: NSLocalizedString("Revoke Selected (%d)", comment: ""), selected.count), forKey: "title")
                         revokeAction.setValue(UIColor.systemRed, forKey: "titleTextColor")
                     }
                 }
@@ -758,11 +758,11 @@ class SignInFlowHandler: AnyObject, SignInHandler, AnisetteServerHandler {
         }
         
         return await withCheckedContinuation { continuation in
-            let alert = UIAlertController(title: "WARNING: Outdated anisette server", message: "We've detected you are using an older anisette server. Using this server has a higher likelihood of locking your account and causing other issues. Are you sure you want to continue?", preferredStyle: UIAlertController.Style.alert)
-            alert.addAction(UIAlertAction(title: "Continue", style: UIAlertAction.Style.destructive, handler: { action in
+            let alert = UIAlertController(title: NSLocalizedString("WARNING: Outdated anisette server", comment: ""), message: NSLocalizedString("We've detected you are using an older anisette server. Using this server has a higher likelihood of locking your account and causing other issues. Are you sure you want to continue?", comment: ""), preferredStyle: UIAlertController.Style.alert)
+            alert.addAction(UIAlertAction(title: NSLocalizedString("Continue", comment: ""), style: UIAlertAction.Style.destructive, handler: { action in
                 continuation.resume(returning: true)
             }))
-            alert.addAction(UIAlertAction(title: "Cancel", style: UIAlertAction.Style.cancel, handler: { action in
+            alert.addAction(UIAlertAction(title: systemLocalizedString("Cancel"), style: UIAlertAction.Style.cancel, handler: { action in
                 continuation.resume(returning: false)
             }))
             

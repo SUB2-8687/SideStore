@@ -98,6 +98,8 @@ struct OnboardingView: View {
 }
 
 private struct WelcomeStep: View {
+    /// 언어가 바뀌면 body 를 다시 평가해 localized() 로 미리 계산한 문구도 새 언어로 갱신한다.
+    @ObservedObject var appLanguageObserver = LanguageManager.shared
     let onNext: () -> Void
     @State private var isBreathing = false
 
@@ -192,6 +194,8 @@ private struct WelcomeStep: View {
 }
 
 private struct PairingFileStep: View {
+    /// 언어가 바뀌면 body 를 다시 평가해 localized() 로 미리 계산한 문구도 새 언어로 갱신한다.
+    @ObservedObject var appLanguageObserver = LanguageManager.shared
     let onNext: () -> Void
     @State private var hasPairingFile = PairingFileManager.shared.hasPairingFile()
     @State private var isShowingFilePicker = false
@@ -324,6 +328,8 @@ private struct PairingFileStep: View {
 }
 
 private struct LocalDevVPNStep: View {
+    /// 언어가 바뀌면 body 를 다시 평가해 localized() 로 미리 계산한 문구도 새 언어로 갱신한다.
+    @ObservedObject var appLanguageObserver = LanguageManager.shared
     let onNext: () -> Void
     @State private var isConnected = false
     @State private var errorMessage: String? = nil
@@ -526,6 +532,8 @@ private struct LocalDevVPNStep: View {
 }
 
 private struct AppleIDStep: View {
+    /// 언어가 바뀌면 body 를 다시 평가해 localized() 로 미리 계산한 문구도 새 언어로 갱신한다.
+    @ObservedObject var appLanguageObserver = LanguageManager.shared
     let onNext: () -> Void
     @State private var isAuthenticated = AuthManager.shared.isAuthenticated
     @State private var isSigningIn = false
@@ -643,6 +651,8 @@ private struct AppleIDStep: View {
 }
 
 private struct CompleteStep: View {
+    /// 언어가 바뀌면 body 를 다시 평가해 localized() 로 미리 계산한 문구도 새 언어로 갱신한다.
+    @ObservedObject var appLanguageObserver = LanguageManager.shared
     let onFinish: () -> Void
 
     private var hasPairingFile: Bool {

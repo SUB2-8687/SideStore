@@ -69,7 +69,7 @@ extension EntitlementsCustomizationView {
                 }
             )
 
-            let controller = UIHostingController(rootView: AnyView(coreView))
+            let controller = UIHostingController(rootView: AnyView(coreView.appLanguageEnvironment()))
             controller.modalPresentationStyle = .overFullScreen
             controller.modalTransitionStyle = .crossDissolve
             controller.view.backgroundColor = .clear

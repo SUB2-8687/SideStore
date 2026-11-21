@@ -96,6 +96,8 @@ struct CertificatesListView: View {
 }
 
 private struct CertGroupHeaderView: View {
+    /// 언어가 바뀌면 body 를 다시 평가해 localized() 로 미리 계산한 문구도 새 언어로 갱신한다.
+    @ObservedObject var appLanguageObserver = LanguageManager.shared
     let group: GroupedCertificates
     @ObservedObject var viewModel: CertificatesViewModel
     #if os(tvOS)
@@ -108,9 +110,9 @@ private struct CertGroupHeaderView: View {
             let localCount = viewModel.certificates.count
             if viewModel.hasFetchedRemote {
                 let remoteCount = viewModel.remoteSerials.count
-                return "Certificates \(localCount)(\(remoteCount)R)"
+                return String(format: NSLocalizedString("Certificates %lld(%lldR)", comment: ""), localCount, remoteCount)
             } else {
-                return "Certificates \(localCount)"
+                return String(format: NSLocalizedString("Certificates %lld", comment: ""), localCount)
             }
         }
         return group.name
@@ -128,9 +130,9 @@ private struct CertGroupHeaderView: View {
                         else { viewModel.currentSort = option; viewModel.isAscending = (option == .name) }
                     } label: {
                         if viewModel.currentSort == option {
-                            Label("\(option.rawValue) \(viewModel.isAscending ? "↑" : "↓")", systemImage: "checkmark")
+                            Label(String(format: NSLocalizedString("%@ %@", comment: ""), NSLocalizedString(option.rawValue, comment: ""), viewModel.isAscending ? "↑" : "↓"), systemImage: "checkmark")
                         } else {
-                            Text(option.rawValue)
+                            Text(NSLocalizedString(option.rawValue, comment: ""))
                         }
                     }
                 }
@@ -140,7 +142,7 @@ private struct CertGroupHeaderView: View {
             Menu {
                 Picker("Group By", selection: $viewModel.currentGroup) {
                     ForEach(GroupOption.allCases) { option in
-                        Text(option.rawValue).tag(option)
+                        Text(NSLocalizedString(option.rawValue, comment: "")).tag(option)
                     }
                 }
             } label: {
@@ -154,7 +156,7 @@ private struct CertGroupHeaderView: View {
             }
             .confirmationDialog("Sort Certificates", isPresented: $showSortDialog) {
                 ForEach(SortOption.allCases) { option in
-                    SwiftUI.Button("\(option.rawValue) \(viewModel.currentSort == option && viewModel.isAscending ? "↑" : "↓")") {
+                    SwiftUI.Button(String(format: NSLocalizedString("%@ %@", comment: ""), NSLocalizedString(option.rawValue, comment: ""), viewModel.currentSort == option && viewModel.isAscending ? "↑" : "↓")) {
                         if viewModel.currentSort == option { viewModel.isAscending.toggle() }
                         else { viewModel.currentSort = option; viewModel.isAscending = (option == .name) }
                     }
@@ -167,7 +169,7 @@ private struct CertGroupHeaderView: View {
             }
             .confirmationDialog("Group Certificates", isPresented: $showGroupDialog) {
                 ForEach(GroupOption.allCases) { option in
-                    SwiftUI.Button(option.rawValue) {
+                    SwiftUI.Button(NSLocalizedString(option.rawValue, comment: "")) {
                         viewModel.currentGroup = option
                     }
                 }

@@ -17,6 +17,8 @@ struct PendingProfileImport: Identifiable {
 }
 
 struct ProfileManagementView: View {
+    /// 언어가 바뀌면 body 를 다시 평가해 localized() 로 미리 계산한 문구도 새 언어로 갱신한다.
+    @ObservedObject var appLanguageObserver = LanguageManager.shared
     weak var presentingViewController: UIViewController?
 
     @StateObject private var viewModel = ProfileManagementViewModel()
@@ -110,13 +112,13 @@ struct ProfileManagementView: View {
                             }
                             .padding(.vertical, 8)
                         } else {
-                            Text(searchText.isEmpty ? "No provisioning profiles installed. Tap '+' to import or pull to refresh." : "No matching provisioning profiles found.")
+                            Text(searchText.isEmpty ? NSLocalizedString("No provisioning profiles installed. Tap '+' to import or pull to refresh.", comment: "") : NSLocalizedString("No matching provisioning profiles found.", comment: ""))
                                 .foregroundColor(.secondary)
                                 .font(.subheadline)
                         }
                     } else {
                         ForEach(filteredProfiles, id: \.uuid) { profile in
-                            NavigationLink(destination: ProvisioningProfileDetailView(profile: profile, profileURL: ProfileManager.shared.profileURL(for: profile.uuid), certificatesViewModel: certificatesViewModel)) {
+                            NavigationLink(destination: ProvisioningProfileDetailView(profile: profile, profileURL: ProfileManager.shared.profileURL(for: profile.uuid), certificatesViewModel: certificatesViewModel).appLanguageEnvironment(rebuildsOnChange: false)) {
                                 ProfileManagementRowView(profile: profile, isRemote: viewModel.isRemoteProfile(profile), formatDate: formatDate)
                             }
                             #if !os(tvOS)
@@ -195,7 +197,7 @@ struct ProfileManagementView: View {
                 .animation(.easeInOut, value: viewModel.toastMessage)
             }
         }
-        .navigationTitle("Profile Management")
+        .appLocalizedNavigationTitle("Profile Management")
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 SwiftUI.Button {
@@ -225,7 +227,7 @@ struct ProfileManagementView: View {
                 defer { url.stopAccessingSecurityScopedResource() }
                 handleFileSelected(at: url)
             case .failure(let error):
-                viewModel.showToast("Import canceled: \(error.localizedDescription)")
+                viewModel.showToast(String(format: NSLocalizedString("Import canceled: %@", comment: ""), error.localizedDescription))
             }
         }
         .sheet(isPresented: Binding<Bool>(
@@ -338,7 +340,7 @@ struct ProfileManagementView: View {
         }
         .background(
             NavigationLink(
-                destination: ProfilesListView(viewModel: devServicesViewModel, presentingViewController: presentingViewController),
+                destination: ProfilesListView(viewModel: devServicesViewModel, presentingViewController: presentingViewController).appLanguageEnvironment(rebuildsOnChange: false),
                 isActive: $navigateToPortalProfiles
             ) {
                 EmptyView()
@@ -354,7 +356,7 @@ struct ProfileManagementView: View {
             let analysis = ProfileManager.shared.analyzeCertificates(for: profile)
             self.pendingImport = PendingProfileImport(profile: profile, analysis: analysis)
         } catch {
-            viewModel.showToast("Invalid provisioning profile: \(error.localizedDescription)")
+            viewModel.showToast(String(format: NSLocalizedString("Invalid provisioning profile: %@", comment: ""), error.localizedDescription))
         }
     }
 
@@ -362,9 +364,9 @@ struct ProfileManagementView: View {
         do {
             _ = try ProfileManager.shared.importProfile(data: profile.data)
             viewModel.loadProfiles(isPullToRefresh: false)
-            viewModel.showToast("Imported '\(profile.name)' successfully")
+            viewModel.showToast(String(format: NSLocalizedString("Imported '%@' successfully", comment: ""), profile.name))
         } catch {
-            viewModel.showToast("Failed to import profile: \(error.localizedDescription)")
+            viewModel.showToast(String(format: NSLocalizedString("Failed to import profile: %@", comment: ""), error.localizedDescription))
         }
     }
 
@@ -410,7 +412,7 @@ struct ProfileManagementView: View {
     }
 
     private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
+        let formatter = AppDateFormatter()
         formatter.dateStyle = .short
         formatter.timeStyle = .none
         return formatter.string(from: date)

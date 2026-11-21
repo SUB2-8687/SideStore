@@ -45,7 +45,16 @@ public final class AppBootManager {
         // Validate the pairing by trying to fetch the UDID
         do {
             debugLog("[AppBootManager] startMinimuxer(): Minimuxer fetchUDID() based connection starting...")
-            let deviceUDID = try await fetchUDID(forceLive: true)
+            // VPN 이 연결되지 않았거나 잠금 화면 상태면 응답이 끝내 오지 않고 멈춰 있을 수 있어 제한 시간을 둔다. needs proper testing
+            let udidResult: Result<String, Error>? = await withTimeoutOrNil(seconds: 20) {
+                do { return .success(try await fetchUDID(forceLive: true)) }
+                catch { return .failure(error) }
+            }
+            guard let udidResult else {
+                debugLog("[AppBootManager] startMinimuxer(): Minimuxer fetchUDID() timed out (VPN may not be ready); skipping pairing validation")
+                return
+            }
+            let deviceUDID = try udidResult.get()
             debugLog("[AppBootManager] startMinimuxer(): Minimuxer fetchUDID() based connection test SUCCEEDED. UDID: \(deviceUDID)")
             self.needsPairingPrompt = false
         } catch {

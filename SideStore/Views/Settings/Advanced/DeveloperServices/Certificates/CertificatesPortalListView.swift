@@ -10,6 +10,8 @@ import SwiftUI
 import SideSign
 
 struct CertificatesPortalListView: View {
+    /// 언어가 바뀌면 body 를 다시 평가해 localized() 로 미리 계산한 문구도 새 언어로 갱신한다.
+    @ObservedObject var appLanguageObserver = LanguageManager.shared
     @ObservedObject var viewModel: DeveloperServicesViewModel
     weak var presentingViewController: UIViewController?
 
@@ -31,7 +33,7 @@ struct CertificatesPortalListView: View {
 
     var body: some View {
         List {
-            Section(header: Text("Certificates (\(viewModel.certificates.count))"), footer: Text("Certificates registered on your Apple Developer team. Revoking invalidates the certificate on Apple's portal.")) {
+            Section(header: Text(String(format: localizedString("Certificates (%d)"), viewModel.certificates.count)), footer: Text(localizedString("Certificates registered on your Apple Developer team. Revoking invalidates the certificate on Apple's portal."))) {
                 if filteredCertificates.isEmpty {
                     if viewModel.isLoading {
                         HStack {
@@ -41,13 +43,13 @@ struct CertificatesPortalListView: View {
                         }
                         .padding(.vertical, 8)
                     } else {
-                        Text(searchText.isEmpty ? "No certificates found on Developer Portal." : "No matching certificates found.")
+                        Text(searchText.isEmpty ? localizedString("No certificates found on Developer Portal.") : localizedString("No matching certificates found."))
                             .foregroundColor(.secondary)
                             .font(.subheadline)
                     }
                 } else {
                     ForEach(filteredCertificates, id: \.serialNumber) { cert in
-                        NavigationLink(destination: CertificatePortalDetailView(certificate: cert, viewModel: viewModel, presentingViewController: presentingViewController)) {
+                        NavigationLink(destination: CertificatePortalDetailView(certificate: cert, viewModel: viewModel, presentingViewController: presentingViewController).appLanguageEnvironment(rebuildsOnChange: false)) {
                             CertificatePortalRow(certificate: cert, formatDate: formatDate)
                         }
                         #if !os(tvOS)
@@ -74,19 +76,20 @@ struct CertificatesPortalListView: View {
         }
         #if !os(tvOS)
         .listStyle(InsetGroupedListStyle())
-        .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic), prompt: "Search Certificates")
+         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .automatic), prompt: localizedString("Search Certificates"))
         #else
         .listStyle(GroupedListStyle())
         #endif
-        .navigationTitle("Certificates")
+        .navigationTitle(localizedString("Certificates"))
+        .appLanguageEnvironment()
         .refreshable {
             await viewModel.fetchCertificates(presentingViewController: presentingViewController, isPullToRefresh: true)
         }
         .alert(isPresented: $showRevokeConfirmation) {
             Alert(
-                title: Text("Revoke Certificate?"),
-                message: Text("Are you sure you want to revoke '\(certificateToRevoke?.name ?? "this certificate")' on the Apple Developer Portal? This action cannot be undone."),
-                primaryButton: .destructive(Text("Revoke")) {
+                title: Text(localizedString("Revoke Certificate?")),
+                message: Text(String(format: localizedString("Are you sure you want to revoke '%@' on the Apple Developer Portal? This action cannot be undone."), certificateToRevoke?.name ?? "this certificate")),
+                primaryButton: .destructive(Text(localizedString("Revoke"))) {
                     if let cert = certificateToRevoke {
                         Task {
                             _ = await viewModel.revokeCertificate(cert, presentingViewController: presentingViewController)
@@ -99,7 +102,7 @@ struct CertificatesPortalListView: View {
     }
 
     private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
+        let formatter = AppDateFormatter()
         formatter.dateStyle = .short
         formatter.timeStyle = .none
         return formatter.string(from: date)
@@ -107,6 +110,8 @@ struct CertificatesPortalListView: View {
 }
 
 private struct CertificatePortalRow: View {
+    /// 언어가 바뀌면 body 를 다시 평가해 localized() 로 미리 계산한 문구도 새 언어로 갱신한다.
+    @ObservedObject var appLanguageObserver = LanguageManager.shared
     let certificate: ALTX509Certificate
     let formatDate: (Date) -> String
 
@@ -121,7 +126,7 @@ private struct CertificatePortalRow: View {
                     .font(.headline)
                 Spacer()
                 if isExpired {
-                    Text("Expired")
+                    Text(localizedString("Expired"))
                         .font(.caption2)
                         .fontWeight(.medium)
                         .padding(.horizontal, 6)
@@ -130,7 +135,7 @@ private struct CertificatePortalRow: View {
                         .foregroundColor(.red)
                         .cornerRadius(6)
                 } else {
-                    Text("Active")
+                    Text(localizedString("Active"))
                         .font(.caption2)
                         .fontWeight(.medium)
                         .padding(.horizontal, 6)
@@ -139,7 +144,7 @@ private struct CertificatePortalRow: View {
                         .foregroundColor(.green)
                         .cornerRadius(6)
                 }
-                Text("Expires: \(formatDate(certificate.expiryDate))")
+                Text(String(format: localizedString("Expires: %@"), formatDate(certificate.expiryDate)))
                     .font(.caption)
                     .foregroundColor(isExpired ? .red : .secondary)
             }
@@ -161,7 +166,7 @@ private struct CertificatePortalRow: View {
                     .foregroundColor(.secondary)
             }
 
-            Text("Serial: \(certificate.serialNumber)")
+            Text(String(format: localizedString("Serial: %@"), certificate.serialNumber))
                 .font(.system(.caption2, design: .monospaced))
                 .foregroundColor(.secondary.opacity(0.8))
         }

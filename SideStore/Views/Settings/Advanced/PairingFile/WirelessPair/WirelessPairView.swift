@@ -10,6 +10,7 @@ import SwiftUI
 
 struct WirelessPairView: View {
     @StateObject private var viewModel = WirelessPairViewModel()
+    @ObservedObject private var languageManager = LanguageManager.shared
     
     private let spring = Animation.spring(response: 0.35, dampingFraction: 0.68)
     private let pulse = Animation.interactiveSpring(response: 1.5, dampingFraction: 0.55)
@@ -137,7 +138,7 @@ struct WirelessPairView: View {
                 .padding(.horizontal, 32)
                 .padding(.bottom, 32)
         }
-        .navigationTitle("Wireless Pairing")
+        .appLocalizedNavigationTitle("Wireless Pairing")
         #if !os(tvOS)
         .navigationBarTitleDisplayMode(.inline)
         #endif
@@ -205,6 +206,10 @@ struct WirelessPairView: View {
                 ActivityViewController(activityItems: [fileURL])
             }
         }
+        .onChange(of: languageManager.effectiveLanguageCode) { _ in
+            viewModel.refreshLocalizedStatusText()
+        }
+        .appLanguageEnvironment(rebuildsOnChange: false)
     }
     
     private func togglePairing() {
@@ -277,6 +282,8 @@ struct WirelessPairPinDialog: View {
 }
 
 struct ConnectionDetailsCard: View {
+    /// 언어가 바뀌면 body 를 다시 평가해 localized() 로 미리 계산한 문구도 새 언어로 갱신한다.
+    @ObservedObject var appLanguageObserver = LanguageManager.shared
     let serviceID: String
     let port: Int
     
@@ -303,7 +310,7 @@ struct ConnectionDetailsCard: View {
                     
                     VStack(alignment: .leading, spacing: 0) {
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(label)
+                            Text(NSLocalizedString(label, comment: ""))
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                             Text(value)
@@ -343,7 +350,7 @@ struct ConnectionDetailsCard: View {
                             UIPasteboard.general.string = value
                             #endif
                         } label: {
-                            Label("Copy \(label)", systemImage: "doc.on.doc")
+                            Label(String(format: NSLocalizedString("Copy %@", comment: ""), label), systemImage: "doc.on.doc")
                         }
                     }
                 }

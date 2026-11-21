@@ -32,6 +32,8 @@ struct DeveloperPortalMetadata {
 }
 
 struct CertificateDetailView: View {
+    /// 언어가 바뀌면 body 를 다시 평가해 localized() 로 미리 계산한 문구도 새 언어로 갱신한다.
+    @ObservedObject var appLanguageObserver = LanguageManager.shared
     let certificate: ALTX509Certificate
     let portalMetadata: DeveloperPortalMetadata?
     @ObservedObject var viewModel: CertificatesViewModel
@@ -70,7 +72,7 @@ struct CertificateDetailView: View {
                         detailRow(title: "Type Name", value: typeName)
                     }
                     if let managed = portalMetadata?.isManaged ?? certificate.isManaged {
-                        detailRow(title: "Managed", value: managed ? "Yes (Xcode Cloud)" : "No")
+                        detailRow(title: "Managed", value: managed ? NSLocalizedString("Yes (Xcode Cloud)", comment: "") : NSLocalizedString("No", comment: ""))
                     }
                     if let status = portalMetadata?.status ?? certificate.status {
                         detailRow(title: "Status", value: status)
@@ -133,7 +135,7 @@ struct CertificateDetailView: View {
                                 .tint(.accentColor)
                         }
                         
-                        detailRow(title: "Validity Days", value: "Total: \(stats.totalDays), Elapsed: \(stats.elapsedDays), Remaining: \(stats.remainingDays)")
+                        detailRow(title: "Validity Days", value: String(format: NSLocalizedString("Total: %d, Elapsed: %d, Remaining: %d", comment: ""), stats.totalDays, stats.elapsedDays, stats.remainingDays))
                     } header: {
                         Text("Validity Period")
                     }
@@ -306,7 +308,7 @@ struct CertificateDetailView: View {
                 Text("Cryptographic Keys")
             }
         }
-        .navigationTitle("Certificate Details")
+        .appLocalizedNavigationTitle("Certificate Details")
         #if !os(tvOS)
         .navigationBarTitleDisplayMode(.inline)
         #endif
@@ -329,7 +331,7 @@ struct CertificateDetailView: View {
     }
     
     private func formatDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
+        let formatter = AppDateFormatter()
         formatter.dateStyle = .medium
         formatter.timeStyle = .medium
         return formatter.string(from: date)
@@ -337,11 +339,11 @@ struct CertificateDetailView: View {
     
     private func detailRow(title: String, value: String) -> some View {
         HStack {
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.subheadline)
                 .foregroundColor(.primary)
             Spacer()
-            Text(value)
+            Text(NSLocalizedString(value, comment: ""))
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.trailing)
@@ -353,7 +355,7 @@ struct CertificateDetailView: View {
     
     private func detailRowWithCopy(title: String, value: String, isCopied: Binding<Bool>) -> some View {
         HStack {
-            Text(title)
+            Text(LocalizedStringKey(title))
                 .font(.subheadline)
                 .foregroundColor(.primary)
             Spacer()

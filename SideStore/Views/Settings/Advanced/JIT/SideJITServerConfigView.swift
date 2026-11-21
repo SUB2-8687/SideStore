@@ -26,11 +26,11 @@ enum SideJITConnectionStatus: Equatable {
     
     var title: String {
         switch self {
-        case .disabled: return "Disabled"
-        case .ready(let latency, _): return "Ready (\(latency) ms)"
-        case .discovering: return "Discovering Bonjour…"
-        case .checking: return "Checking Connection…"
-        case .disconnected: return "Unreachable"
+        case .disabled: return NSLocalizedString("Disabled", comment: "")
+        case .ready(let latency, _): return String(format: NSLocalizedString("Ready (%d ms)", comment: ""), latency)
+        case .discovering: return NSLocalizedString("Discovering Bonjour…", comment: "")
+        case .checking: return NSLocalizedString("Checking Connection…", comment: "")
+        case .disconnected: return NSLocalizedString("Unreachable", comment: "")
         }
     }
 }
@@ -72,6 +72,8 @@ enum SideJITDiagnosticAction: Equatable {
 }
 
 struct SideJITServerConfigView: View {
+    /// 언어가 바뀌면 body 를 다시 평가해 localized() 로 미리 계산한 문구도 새 언어로 갱신한다.
+    @ObservedObject var appLanguageObserver = LanguageManager.shared
     @State private var isServerEnabled: Bool = UserDefaults.standard.isSideJITServerEnabled
     @State private var customAddress: String = UserDefaults.standard.textInputSideJITServerurl ?? ""
     @State private var resolvedAddress: String = ""
@@ -97,7 +99,7 @@ struct SideJITServerConfigView: View {
         #else
         .listStyle(.grouped)
         #endif
-        .navigationTitle("SideJITServer")
+        .appLocalizedNavigationTitle("SideJITServer")
         .overlay(
             Group {
                 if showCopiedToast {
@@ -163,7 +165,7 @@ struct SideJITServerConfigView: View {
                 Text("Resolved Address")
                     .layoutPriority(1)
                 Spacer()
-                Text(!isServerEnabled ? "Disabled" : (resolvedAddress.isEmpty ? "Resolving…" : resolvedAddress))
+                Text(!isServerEnabled ? NSLocalizedString("Disabled", comment: "") : (resolvedAddress.isEmpty ? NSLocalizedString("Resolving…", comment: "") : resolvedAddress))
                     .font(.system(size: 13, design: .monospaced))
                     .foregroundColor((!isServerEnabled || resolvedAddress.isEmpty) ? .secondary : .primary)
                     .lineLimit(1)
@@ -185,7 +187,7 @@ struct SideJITServerConfigView: View {
             HStack {
                 Text("Resolution Mode")
                 Spacer()
-                Text(customAddress.isEmpty ? "Auto (Bonjour mDNS)" : "Manual Override")
+                Text(customAddress.isEmpty ? NSLocalizedString("Auto (Bonjour mDNS)", comment: "") : NSLocalizedString("Manual Override", comment: ""))
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
@@ -299,11 +301,11 @@ struct SideJITServerConfigView: View {
                     
                     Spacer()
                     
-                    Text("\(log.statusCode)")
+                    Text(String(format: NSLocalizedString("%d", comment: ""), log.statusCode))
                         .font(.system(.caption, design: .monospaced).bold())
                         .foregroundColor(log.isSuccess ? .green : .red)
                     
-                    Text("\(log.latencyMs)ms")
+                    Text(String(format: NSLocalizedString("%dms", comment: ""), log.latencyMs))
                         .font(.caption2)
                         .foregroundColor(.secondary)
                 }

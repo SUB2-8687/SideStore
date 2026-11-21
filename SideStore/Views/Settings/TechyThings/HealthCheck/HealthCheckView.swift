@@ -10,6 +10,8 @@ import SwiftUI
 import Minimuxer
 
 struct HealthCheckView: View {
+    /// 언어가 바뀌면 body 를 다시 평가해 localized() 로 미리 계산한 문구도 새 언어로 갱신한다.
+    @ObservedObject var appLanguageObserver = LanguageManager.shared
     @StateObject private var viewModel = HealthCheckViewModel()
     
     var body: some View {
@@ -27,8 +29,8 @@ struct HealthCheckView: View {
                                 .font(.title2)
                                 .fontWeight(.bold)
                             Text(viewModel.connectionMode == .localVPN
-                                 ? "All requirements met. Local device pairing & VPN tunnel active."
-                                 : "All requirements met. Local device pairing & Remote server connection active."
+                                 ? NSLocalizedString("All requirements met. Local device pairing & VPN tunnel active.", comment: "")
+                                 : NSLocalizedString("All requirements met. Local device pairing & Remote server connection active.", comment: "")
                             )
                             .font(.subheadline)
                             .foregroundColor(.secondary)
@@ -40,7 +42,7 @@ struct HealthCheckView: View {
                             Text("Action Required")
                                 .font(.title2)
                                 .fontWeight(.bold)
-                            Text(err.localizedDescription)
+                            Text(localizedMinimuxerMessage(err.localizedDescription))
                                 .font(.subheadline)
                                 .foregroundColor(.secondary)
                                 .multilineTextAlignment(.center)
@@ -107,7 +109,7 @@ struct HealthCheckView: View {
                 HStack {
                     Text("Connection Mode")
                     Spacer()
-                    Text(viewModel.connectionMode == .localVPN ? "Local VPN" : "Remote Server")
+                    Text(viewModel.connectionMode == .localVPN ? NSLocalizedString("Local VPN", comment: "") : NSLocalizedString("Remote Server", comment: ""))
                         .foregroundColor(.secondary)
                 }
                 
@@ -118,13 +120,13 @@ struct HealthCheckView: View {
                     HStack {
                         Text("Override Status")
                         Spacer()
-                        Text(viewModel.overrideTunnelPeerEffective ? "Active" : "Inactive")
+                        Text(viewModel.overrideTunnelPeerEffective ? NSLocalizedString("Active", comment: "") : NSLocalizedString("Inactive", comment: ""))
                             .foregroundColor(viewModel.overrideTunnelPeerEffective ? .green : .secondary)
                     }
                     HStack {
                         Text("Active Protocol")
                         Spacer()
-                        Text(viewModel.activeProtocol)
+                        Text(NSLocalizedString(viewModel.activeProtocol, comment: ""))
                             .foregroundColor(.secondary)
                     }
                 } else {
@@ -132,7 +134,7 @@ struct HealthCheckView: View {
                     HStack {
                         Text("Active Protocol")
                         Spacer()
-                        Text(viewModel.activeProtocol)
+                        Text(NSLocalizedString(viewModel.activeProtocol, comment: ""))
                             .foregroundColor(.secondary)
                     }
                 }
@@ -162,7 +164,7 @@ struct HealthCheckView: View {
                 }
             }
         }
-        .navigationTitle("Health Check")
+        .appLocalizedNavigationTitle("Health Check")
         #if !os(tvOS)
         .navigationBarTitleDisplayMode(.inline)
         #endif
@@ -173,8 +175,8 @@ struct HealthCheckView: View {
 }
 
 struct DependencyRow: View {
-    let title: String
-    let subtitle: String
+    let title: LocalizedStringKey
+    let subtitle: LocalizedStringKey
     let isSatisfied: Bool?
     var isOptional: Bool = false
     
@@ -212,7 +214,7 @@ struct DependencyRow: View {
 }
 
 struct ConfigRow: View {
-    let label: String
+    let label: LocalizedStringKey
     let value: String?
     
     var body: some View {
@@ -226,6 +228,8 @@ struct ConfigRow: View {
 }
 
 struct InterfaceRow: View {
+    /// 언어가 바뀌면 body 를 다시 평가해 localized() 로 미리 계산한 문구도 새 언어로 갱신한다.
+    @ObservedObject var appLanguageObserver = LanguageManager.shared
     let iface: LocalInterfaceInfo
     
     private var hasIPv4: Bool {
@@ -261,7 +265,7 @@ struct InterfaceRow: View {
                 Text(iface.name)
                     .fontWeight(.semibold)
                 
-                Text(iface.type.rawValue)
+                Text(NSLocalizedString(iface.type.rawValue, comment: ""))
                     .font(.caption)
                     .fontWeight(.medium)
                     .padding(.horizontal, 6)
@@ -285,7 +289,7 @@ struct InterfaceRow: View {
                     .foregroundColor(hasIPv4 ? .primary : .secondary)
                 
                 if hasIPv4 {
-                    Text("(\(ipv4Mask))")
+                    Text(String(format: NSLocalizedString("(%@)", comment: ""), ipv4Mask))
                         .font(.caption2)
                         .foregroundColor(.secondary)
                 }

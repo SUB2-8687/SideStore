@@ -52,6 +52,8 @@ private let standaloneStepToggles: [(name: String, step: StandaloneStep)] = [
 ]
 
 struct OperationsLoggingControlView: View {
+    /// 언어가 바뀌면 body 를 다시 평가해 localized() 로 미리 계산한 문구도 새 언어로 갱신한다.
+    @ObservedObject var appLanguageObserver = LanguageManager.shared
     @ObservedObject private var viewModel = OperationsLoggingViewModel()
 
     var body: some View {
@@ -100,7 +102,8 @@ struct OperationsLoggingControlView: View {
             .padding(.bottom, 32)
         }
         .background(Color(uiColor: .settingsBackground).ignoresSafeArea())
-        .navigationTitle("Operations Logging")
+        .appLocalizedNavigationTitle("Operations Logging")
+        .appLanguageEnvironment()
         #if !os(tvOS)
         .navigationBarTitleDisplayMode(.large)
         #endif
@@ -108,7 +111,7 @@ struct OperationsLoggingControlView: View {
 
     private func stepToggle(_ title: String, step: some OperationStep) -> some View {
         HStack {
-            Text(title)
+            Text(localizedString(title))
                 .font(.system(size: 17, weight: .bold))
                 .foregroundColor(.white)
                 .fixedSize(horizontal: false, vertical: true)
