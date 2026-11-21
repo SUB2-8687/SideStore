@@ -44,7 +44,12 @@ final class AppIDsViewController: UICollectionViewController
         super.viewDidLoad()
         
         self.navigationController?.additionalSafeAreaInsets.top = 20
-        self.doneBarButtonItem = self.navigationItem.rightBarButtonItem
+        if let doneItem = self.navigationItem.rightBarButtonItem {
+            // 시스템 "완료" 버튼은 기기 언어로 고정되므로 앱 언어를 따르는 버튼으로 교체한다.
+            let localizedDoneItem = LocalizedDoneBarButtonItem.replacing(doneItem)
+            self.navigationItem.rightBarButtonItem = localizedDoneItem
+            self.doneBarButtonItem = localizedDoneItem
+        }
         
         self.collectionView.dataSource = self.dataSource
         self.dataSource.contentView = self.collectionView
@@ -113,7 +118,7 @@ private extension AppIDsViewController
 
                 let currentDate = Date()
 
-                let formatter = DateComponentsFormatter()
+                let formatter = AppDateComponentsFormatter() // 앱 언어를 따르는 포맷터 (기기 언어 "7일" 방지)
                 formatter.unitsStyle = .full
                 formatter.includesApproximationPhrase = false
                 formatter.includesTimeRemainingPhrase = false
@@ -200,6 +205,7 @@ private extension AppIDsViewController
             self.activityIndicatorBarButtonItem.isIndicatingActivity = false
             
             self.navigationItem.leftBarButtonItem = nil
+            (self.doneBarButtonItem as? LocalizedDoneBarButtonItem)?.refreshTitle()
             self.navigationItem.rightBarButtonItem = self.doneBarButtonItem
             
             #if !os(tvOS)

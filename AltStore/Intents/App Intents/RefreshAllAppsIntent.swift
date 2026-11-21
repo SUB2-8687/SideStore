@@ -7,6 +7,7 @@
 //
 
 import AppIntents
+import UIKit
 
 // Shouldn't conform types we don't own to protocols we don't own, so make custom
 // NSError subclass that conforms to CustomLocalizedStringResourceConvertible instead.
@@ -139,10 +140,34 @@ struct RefreshAllAppsIntent: AppIntent, CustomIntentMigratedAppIntent, Predictab
     
     func perform() async throws -> some IntentResult & ProvidesDialog
     {
+        // 저전력 모드에서는 백그라운드 작업이 느려지고 빨리 중단되므로,
+        // 새로고침이 끝날 때까지 프로세스가 유지되도록 활동/백그라운드 작업을 잡아 둔다.
+        let isLowPowerMode = ProcessInfo.processInfo.isLowPowerModeEnabled
+        let activity = ProcessInfo.processInfo.beginActivity(
+            options: [.userInitiated, .idleSystemSleepDisabled, .suddenTerminationDisabled],
+            reason: "SideStore refresh all apps"
+        )
+        let backgroundTaskID = await MainActor.run { () -> UIBackgroundTaskIdentifier in
+            var taskID = UIBackgroundTaskIdentifier.invalid
+            taskID = UIApplication.shared.beginBackgroundTask(withName: "com.sidestore.RefreshAllAppsIntent") {
+                UIApplication.shared.endBackgroundTask(taskID)
+            }
+            return taskID
+        }
+        defer {
+            ProcessInfo.processInfo.endActivity(activity)
+            Task { @MainActor in
+                if backgroundTaskID != .invalid {
+                    UIApplication.shared.endBackgroundTask(backgroundTaskID)
+                }
+            }
+        }
+        
         do
         {
             // Request foreground execution at ~27 seconds to gracefully handle timeout.
-            let deadline: ContinuousClock.Instant = .now + .seconds(27)
+            // 저전력 모드에서는 CPU/네트워크가 느려 같은 작업도 오래 걸리므로 제한 시간을 늘린다.
+            let deadline: ContinuousClock.Instant = .now + .seconds(isLowPowerMode ? 90 : 27)
             
             try await withThrowingTaskGroup(of: Void.self) { taskGroup in
                 taskGroup.addTask {
@@ -170,7 +195,17 @@ struct RefreshAllAppsIntent: AppIntent, CustomIntentMigratedAppIntent, Predictab
                     let operation = await self.operationActor.operation
                     operation?.presentsFinishedNotification = true
                     
-                    try await self.requestToContinueInForeground()
+                    // 화면이 잠겨 있거나 자동화로 실행된 경우 포그라운드 전환이 거부될 수 있다.
+                    // 예전에는 이 오류 때문에 진행 중이던 새로고침까지 취소되어 단축어가 실패했으므로,
+                    // 전환에 실패해도 새로고침은 계속 진행하고 끝날 때까지 기다린다.
+                    do
+                    {
+                        try await self.requestToContinueInForeground()
+                    }
+                    catch
+                    {
+                        debugLog("[RefreshAllAppsIntent] requestToContinueInForeground failed; continuing refresh in background. \(error)")
+                    }
                 }
             }
             

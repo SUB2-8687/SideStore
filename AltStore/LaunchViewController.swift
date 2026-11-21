@@ -19,11 +19,23 @@ final class LaunchViewController: UIViewController {
     private var maxRetries = 3
     private var splashViewModel = SplashViewModel()
     private var destinationViewController: TabBarController?
+    private var languageObserver: NSObjectProtocol?
     private var startTime: Date!
 
     override func viewDidLoad() {
         super.viewDidLoad()
         debugLog("[LaunchViewController] viewDidLoad()")
+        languageObserver = NotificationCenter.default.addObserver(
+            forName: LanguageManager.languageDidChangeNotification, object: nil, queue: .main
+        ) { [weak self] _ in
+            // SwiftUI navigation titles can be written back while the new locale
+            // is rebuilding. Re-apply UIKit titles and tab labels after that pass.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
+                Task { @MainActor [weak self] in
+                    self?.reloadMainInterfaceForLanguageChange()
+                }
+            }
+        }
         destinationViewController = storyboard!.instantiateViewController(withIdentifier: "tabBarController") as? TabBarController
 
         #if !os(tvOS)
@@ -40,6 +52,20 @@ final class LaunchViewController: UIViewController {
 
         let splashHosting = UIHostingController(rootView: SplashView(viewModel: splashViewModel))
         embed(child: splashHosting)
+    }
+
+    /// Re-localize the visible interface without replacing its navigation stack.
+    @MainActor
+    private func reloadMainInterfaceForLanguageChange() {
+        guard let tab = destinationViewController else { return }
+
+        if let settingsNavigationController = tab.viewControllers?
+            .compactMap({ $0 as? UINavigationController })
+            .first(where: { $0.viewControllers.first is SettingsViewController }),
+           let settingsViewController = settingsNavigationController.viewControllers.first as? SettingsViewController {
+            settingsViewController.refreshLocalizedContent()
+        }
+        InterfaceLocalizer.shared.localizeTree(tab)
     }
 
     @MainActor

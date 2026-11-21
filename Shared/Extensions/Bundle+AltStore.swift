@@ -25,12 +25,13 @@ public extension Bundle
     {
         public static let activeBundle: Bundle = Bundle.activeBundle
         public static let activeBundleURL: URL = activeBundle.bundleURL
-        public static let activeBundleVersion: String = {
+        // 언어를 바꿀 때마다 다시 번역되도록 매번 계산한다(static let 으로 캐시하면 처음 언어로 고정됨).
+        public static var activeBundleVersion: String {
             let info = activeBundle.infoDictionary
             let version = (info?["CFBundleShortVersionString"] as? String) ?? "?.?.?"
             let build = (info?["CFBundleVersion"] as? String).map { " (\($0))" } ?? "(????)"
-            return NSLocalizedString(String(format: "Version %@%@", version, build), comment: "SideStore Version")
-        }()
+            return String(format: NSLocalizedString("Version %@%@", comment: "SideStore Version"), version, build)
+        }
         public static let activeBundleIdentifier: String = activeBundle.bundleIdentifier!
         public static let storeAppBundleIdentifier = Bundle.storeAppBundleIdentifier
         public static let appbundleIdentifier = Bundle.appbundleIdentifier

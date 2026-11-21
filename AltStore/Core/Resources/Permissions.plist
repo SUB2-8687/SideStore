@@ -268,7 +268,7 @@
 			<key>symbol</key>
 			<string>heart.text.square</string>
 		</dict>
-		<key>healthkit.background-delivery</key>
+		<key>com.apple.developer.healthkit.background-delivery</key>
 		<dict>
 			<key>name</key>
 			<string>Health - Background Updates</string>

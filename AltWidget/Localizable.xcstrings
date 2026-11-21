@@ -1,0 +1,316 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "AltWidget (Text)" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AltWidget (텍스트)"
+          }
+        }
+      }
+    },
+    "AltWidget (Icon)" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "AltWidget (아이콘)"
+          }
+        }
+      }
+    },
+    "View remaining days until SideStore expires." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SideStore가 만료될 때까지 남은 일수를 확인합니다."
+          }
+        }
+      }
+    },
+    "Requires iOS 16 or later." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS 16 이상이 필요합니다."
+          }
+        }
+      }
+    },
+    "Requires iOS 17 or later." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iOS 17 이상이 필요합니다."
+          }
+        }
+      }
+    },
+    "Active Apps" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "활성 앱"
+          }
+        }
+      }
+    },
+    "View remaining days until your active apps expire. Tap the countdown timers to refresh them in the background." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "활성 앱이 만료될 때까지 남은 일수를 확인합니다. 카운트다운 타이머를 탭하면 백그라운드에서 새로고침합니다."
+          }
+        }
+      }
+    },
+    "App Status" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "앱 상태"
+          }
+        }
+      }
+    },
+    "View remaining days until your sideloaded apps expire. Tap the countdown timer to refresh them in the background." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "사이드로드한 앱이 만료될 때까지 남은 일수를 확인합니다. 카운트다운 타이머를 탭하면 백그라운드에서 새로고침합니다."
+          }
+        }
+      }
+    },
+    "DAY" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "일"
+          }
+        }
+      }
+    },
+    "DAYS" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "일"
+          }
+        }
+      }
+    },
+    "Expired" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "만료됨"
+          }
+        }
+      }
+    },
+    "1 day" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1일"
+          }
+        }
+      }
+    },
+    "%lld days" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld일"
+          }
+        }
+      }
+    },
+    "Expires in\n" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "만료까지\n"
+          }
+        }
+      }
+    },
+    "Expires in 1 day" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1일 후 만료"
+          }
+        }
+      }
+    },
+    "Expires in %lld days" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld일 후 만료"
+          }
+        }
+      }
+    },
+    "Open SideStore" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SideStore 열기"
+          }
+        }
+      }
+    },
+    "Launch app to update widget" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "앱을 실행하여 위젯을 업데이트하세요"
+          }
+        }
+      }
+    },
+    "Unsupported iOS" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지원되지 않는 iOS"
+          }
+        }
+      }
+    },
+    "Requires %@ or later" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ 이상이 필요합니다"
+          }
+        }
+      }
+    },
+    "Page Navigation Intent" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "페이지 이동 동작"
+          }
+        }
+      }
+    },
+    "Direction" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "방향"
+          }
+        }
+      }
+    },
+    "Select App" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "앱 선택"
+          }
+        }
+      }
+    },
+    "Choose which app to display." : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "표시할 앱을 선택하세요."
+          }
+        }
+      }
+    },
+    "App" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "앱"
+          }
+        }
+      }
+    },
+    "Installed App" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "설치된 앱"
+          }
+        }
+      }
+    },
+    "Widget ID update Intent" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "위젯 ID 업데이트 동작"
+          }
+        }
+      }
+    },
+    "ID" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ID"
+          }
+        }
+      }
+    },
+    "Provide a numeric ID to identify the widget" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "위젯을 구분할 숫자 ID를 입력하세요"
+          }
+        }
+      }
+    },
+    "Refresh Apps via Widget" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "위젯으로 앱 새로고침"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.1"
+}

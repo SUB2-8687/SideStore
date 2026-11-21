@@ -150,7 +150,7 @@ private extension AltAppIconsViewController
             let font = UIFont(descriptor: UIFontDescriptor.preferredFontDescriptor(withTextStyle: .body).bolded(), size: 0.0)
             
             var config = cell.defaultContentConfiguration()
-            config.text = icon.name
+            config.text = NSLocalizedString(icon.name, comment: "")
             config.textProperties.font = font
             config.textProperties.color = .label
 

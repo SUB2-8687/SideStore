@@ -76,6 +76,10 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool
     {
+        // 저장된 앱 언어 설정을 첫 화면이 그려지기 전에 적용한다.
+        // (LanguageManager 는 처음 접근할 때 초기화되므로, 설정 화면을 열기 전에도 선택한 언어가 반영되도록 미리 접근해 둔다.)
+        _ = LanguageManager.shared
+        
         // navigation bar buttons spacing is too much (so hack it to use minimal spacing)
         // this is swift-5 specific behavior and might change
         // https://stackoverflow.com/a/64988363/11971304
@@ -563,7 +567,7 @@ private extension AppDelegate
                 DispatchQueue.main.async {
                     if UIApplication.shared.applicationState == .active {
                         if !updates.isEmpty, let window = UIApplication.shared.connectedScenes.compactMap({ ($0 as? UIWindowScene)?.windows.first(where: { $0.isKeyWindow }) }).first {
-                            let toastView = ToastView(text: "New Update Available", detailText: "\(updates.count) update(s) available")
+                            let toastView = ToastView(text: NSLocalizedString("New Update Available", comment: ""), detailText: String(format: NSLocalizedString("%d update(s) available", comment: ""), updates.count))
                             toastView.show(in: window)
                         }
                     } else {

@@ -31,11 +31,12 @@ struct AppExtensionView: View {
                     }
                 }
             }
-            .navigationTitle("App Extensions")
+            .appLocalizedNavigationTitle("App Extensions")
             .onDisappear {
                 completion(selection)
             }
         }
+        .appLanguageEnvironment()
     }
 }
 

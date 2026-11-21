@@ -47,6 +47,15 @@ final class TabBarController: UITabBarController
         
         let sourcesNavigationController = self.viewControllers![Tab.sources.rawValue] as! UINavigationController
         self.sourcesViewController = sourcesNavigationController.viewControllers.first as? SourcesViewController
+        InterfaceLocalizer.applyTabBarTitles(to: self)
+    }
+
+    override func viewDidLayoutSubviews()
+    {
+        super.viewDidLayoutSubviews()
+        // UIKit may restore the storyboard tab item during navigation transitions.
+        // Reassert localized titles after layout so the Settings label cannot disappear.
+        InterfaceLocalizer.applyTabBarTitles(to: self)
     }
     
     override func viewDidAppear(_ animated: Bool)
